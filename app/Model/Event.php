@@ -253,6 +253,34 @@ class Event extends AppModel {
 			'conditions' => '',
 			'fields' => '',
 			'order' => ''
+		),
+		'ReportingChannel' => array(
+			'className' => 'ReportingChannel',
+			'foreignKey' => 'reporter_channel_id',
+		),
+		'Reporter' => array(
+			'className' => 'Organisation',
+			'foreignKey' => 'reporter_organisation_id',
+		),
+		'DetectPlace' => array(
+			'className' => 'Organisation',
+			'foreignKey' => 'detect_place_id',
+		),
+		'TargetedEntity' => array(
+			'className' => 'Organisation',
+			'foreignKey' => 'targeted_organisation_id',
+		),
+		'TargetedDomain' => array(
+			'className' => 'Domain',
+			'foreignKey' => 'targeted_domain_id',
+		),
+		'AssessmentLevel' => array(
+			'className' => 'AssessmentLevel',
+			'foreignKey' => 'assessment_level_id',
+		),
+		'DetectMethod' => array(
+			'className' => 'DetectMethod',
+			'foreignKey' => 'detect_method_id',
 		)
 	);
 
@@ -278,6 +306,15 @@ class Event extends AppModel {
 			'counterQuery' => ''
 		)
 	);
+
+	public $hasAndBelongsToMany = array(
+        'SharingGroup' => array(
+            'className' => 'SharingGroup',
+            'joinTable' => 'events_sharing_groups',
+            'foreignKey' => 'event_id',
+            'associationForeignKey' => 'sharing_group_id',
+        )
+    );
 
 	public function beforeDelete($cascade = true) {
 		// delete event from the disk

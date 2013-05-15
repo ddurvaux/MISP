@@ -1,4 +1,3 @@
-
 <div class="attributes form">
 <?php echo $this->Form->create('Attribute');?>
 	<fieldset>
@@ -21,7 +20,8 @@ if ('true' == Configure::read('CyDefSIG.sync')) {
 echo $this->Form->input('to_ids', array(
 			'checked' => true,
 			'before' => $this->Html->div('forminfo', isset($attrDescriptions['signature']['formdesc']) ? $attrDescriptions['signature']['formdesc'] : $attrDescriptions['signature']['desc']),
-			'label' => 'IDS Signature?'
+			'label' => 'IDS Signature?',
+			'div' => 'clear'
 ));
 echo $this->Form->input('batch_import', array(
 		'type' => 'checkbox',
@@ -30,7 +30,14 @@ echo $this->Form->input('batch_import', array(
 echo $this->Form->input('value', array(
 			'type' => 'textarea',
 			'error' => array('escape' => false),
+			'div' => 'clear',
+			'class' => 'input-xxlarge'
 ));
+
+echo $this->Form->input('kill_chain_id');
+echo $this->Form->input('blacklist', array('type' => 'checkbox'));
+echo $this->Form->input('malware_research', array('type' => 'checkbox'));
+echo $this->Form->input('vuln_manag', array('type' => 'checkbox'));
 
 // link an onchange event to the form elements
 $this->Js->get('#AttributeCategory')->event('change', 'formCategoryChanged("#AttributeCategory")');
@@ -38,7 +45,8 @@ $this->Js->get('#AttributeType')->event('change', 'showFormInfo("#AttributeType"
 $this->Js->get('#AttributeDistribution')->event('change', 'showFormInfo("#AttributeDistribution")');
 ?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>

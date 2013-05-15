@@ -43,17 +43,18 @@
 	Router::connect('/logs/admin_search/*', array('controller' => 'logs', 'action' => 'search', 'admin' => true));
 
 	//Router::connect('/admin/users/terms', array('controller' => 'users', 'action' => 'terms'));
-	Router::connect('/admin/users/login', array('controller' => 'users', 'action' => 'login'));
-	Router::connect('/admin/users/routeafterlogin', array('controller' => 'users', 'action' => 'routeafterlogin'));
+	//Router::connect('/admin/users/login', array('controller' => 'users', 'action' => 'login'));
+	//Router::connect('/admin/users/routeafterlogin', array('controller' => 'users', 'action' => 'routeafterlogin'));
 
 //	Router::connect('/admin/users/edit/:id', array('controller' => 'users', 'action' => 'edit'), array('pass' => array('field', 'id')));
-	Router::connect('/admin/users/view/:id', array('controller' => 'users', 'action' => 'view'), array('pass' => array('field', 'id')));
+	//Router::connect('/admin/users/view/:id', array('controller' => 'users', 'action' => 'view'), array('pass' => array('field', 'id')));
 	//Router::connect('/:controller/:field/:newValue/:oldValue', array('action' => 'call'), array('pass' => array('field', 'newValue', 'oldValue')));
 
 	// Activate REST
 	Router::mapResources(array('events', 'attributes'));
 	Router::parseExtensions('xml');
 
+	Router::parseExtensions('json');
 /**
  * Load all plugin routes.  See the CakePlugin documentation on
  * how to customize the loading of plugin routes.

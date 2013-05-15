@@ -27,7 +27,7 @@ class EventsController extends AppController {
 
 	public $paginate = array(
 			'limit' => 60,
-			'maxLimit' => 9999,	// LATER we will bump here on a problem once we have more than 9999 events <- no we won't, this is the max a user van view/page.
+			//'maxLimit' => 9999,	// LATER we will bump here on a problem once we have more than 9999 events <- no we won't, this is the max a user van view/page.
 			'order' => array(
 					'Event.id' => 'DESC'
 			)
@@ -37,6 +37,11 @@ class EventsController extends AppController {
 
 	public function beforeFilter() {
 		parent::beforeFilter();
+
+		/*if($this->request->action == 'edit'){
+			$this->Security->validatePost = false;
+			$this->Security->csrfCheck = false;
+		}*/
 
 		// what pages are allowed for non-logged-in users
 		$this->Auth->allow('xml');
@@ -97,7 +102,22 @@ class EventsController extends AppController {
 	 */
 	public function index() {
 		// list the events
-		$this->Event->recursive = 0;
+		//$this->Event->recursive = 0;
+		if(!empty($this->request->data)){
+            $redirect = array('action' => 'index');
+            foreach($this->request->data['Event'] as $k => $v){
+                if(!empty($v)){
+                    $redirect[$k] = $v
+;                }
+            }
+            $this->redirect($redirect);
+        }
+        if(!empty($this->passedArgs['key'])){
+            $this->paginate['conditions'] = array('Event.info LIKE' => '%'.$this->passedArgs['key'].'%');
+        }
+
+        $this->Event->contain('TargetedEntity', 'TargetedDomain');
+
 
 		$this->set('events', $this->paginate());
 		if (!$this->Auth->user('gpgkey')) {
@@ -326,6 +346,13 @@ class EventsController extends AppController {
 		$this->set('analysisLevels', $this->Event->analysisLevels);
 
 		$this->set('eventDescriptions', $this->Event->fieldDescriptions);
+
+		$this->set('organisations', $this->Event->Reporter->find('list'));
+        $this->set('channels', $this->Event->ReportingChannel->find('list'));
+        $this->set('domains', $this->Event->TargetedDomain->find('list'));
+        $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
+        $this->set('sharingGroups', $this->Event->SharingGroup->find('list'));
+        $this->set('detectMethods', $this->Event->DetectMethod->find('list'));
 	}
 
 	/**
@@ -380,6 +407,12 @@ class EventsController extends AppController {
 					'Attribute' => array('event_id', 'category', 'type', 'value', 'value1', 'value2', 'to_ids', 'uuid', 'revision', 'private', 'cluster', 'communitie', 'dist_change')
 			);
 		}
+
+		if($this->isCTI){
+            $fieldList['Event'] += array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id',
+                'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id'
+            );
+        }
 
 		if ("i" == Configure::read('CyDefSIG.baseurl')) {
 			// this saveAssociated() function will save not only the event, but also the attributes
@@ -468,6 +501,13 @@ class EventsController extends AppController {
 						'Attribute' => array('event_id', 'category', 'type', 'value', 'value1', 'value2', 'to_ids', 'uuid', 'revision', 'private', 'communitie', 'cluster', 'dist_change')
 				);
 
+				if($this->isCTI){
+	                $fieldList['Event'] += array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id',
+	                    'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id'
+	                );
+	            }
+
+
 				if ("ii" == Configure::read('CyDefSIG.rest')) {
 					// reposition to get the attribute.id with given uuid
 					$c = 0;
@@ -528,6 +568,12 @@ class EventsController extends AppController {
 			// say what fields are to be updated
 			$fieldList = array('date', 'risk', 'analysis', 'info', 'published', 'private', 'cluster', 'communitie', 'dist_change');
 
+			if($this->isCTI){
+                $fieldList = array_merge($fieldList, array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id',
+                    'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id'
+                ));
+            }
+
 			//Moved this out of (if ($this->_isAdmin()) to use for the dist_change
 			$this->Event->read();
 
@@ -545,7 +591,8 @@ class EventsController extends AppController {
 					$this->request->data['Event']['dist_change'] = 1 + $this->Event->data['Event']['dist_change'];
 				}
 			}
-			if ($this->Event->save($this->request->data, true, $fieldList)) {
+
+			if ($this->Event->save($this->request->data, false, $fieldList)) {
 				$this->Session->setFlash(__('The event has been saved'));
 				$this->redirect(array('action' => 'view', $id));
 			} else {
@@ -582,6 +629,14 @@ class EventsController extends AppController {
 		$this->set('analysisLevels', $this->Event->analysisLevels);
 
 		$this->set('eventDescriptions', $this->Event->fieldDescriptions);
+
+		$this->set('organisations', $this->Event->Reporter->find('list'));
+        $this->set('channels', $this->Event->ReportingChannel->find('list'));
+        $this->set('domains', $this->Event->TargetedDomain->find('list'));
+        $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
+        $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
+        $this->set('sharingGroups', $this->Event->SharingGroup->find('list'));
+        $this->set('detectMethods', $this->Event->DetectMethod->find('list'));
 	}
 
 	/**
@@ -1749,5 +1804,19 @@ class EventsController extends AppController {
 		// send the event and the vars needed to check authorisation to the Component
 		$final = $this->IOCExport->buildAll($event, $isMyEvent, $isSiteAdmin);
 		$this->set('final', $final);
+	}
+
+	public function downloadCimbl($id){
+		$this->response->type('xml');
+        $this->autoRender = false;
+
+        $this->Event->contain(array('Attribute'));
+        $event = $this->Event->read(null, $id);
+
+        die(debug($event));
+
+        $xmlArray = array('cimbl' => array());
+
+
 	}
 }

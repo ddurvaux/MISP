@@ -23,6 +23,7 @@ if ('true' == Configure::read('CyDefSIG.sync')) {
 }
 echo $this->Form->input('to_ids', array(
 			'before' => $this->Html->div('forminfo', isset($attrDescriptions['signature']['formdesc']) ? $attrDescriptions['signature']['formdesc'] : $attrDescriptions['signature']['desc']),
+			'div' => 'clear',
 			'label' => 'IDS Signature?'
 ));
 if ($attachment) {
@@ -31,6 +32,8 @@ if ($attachment) {
 } else {
 	echo $this->Form->input('value', array(
 			'type' => 'textarea',
+			'div' => 'clear',
+			'class' => 'input-xxlarge',
 			'error' => array('escape' => false),
 	));
 }
@@ -41,7 +44,8 @@ if ($canEditDist) {
 }
 ?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>

@@ -14,7 +14,7 @@ class AttributesController extends AppController {
 
 	public $paginate = array(
 			'limit' => 60,
-			'maxLimit' => 9999, // LATER we will bump here on a problem once we have more than 9999 events
+			//'maxLimit' => 9999, // LATER we will bump here on a problem once we have more than 9999 events
 	);
 
 	public $helpers = array('Js' => array('Jquery'));
@@ -260,6 +260,8 @@ class AttributesController extends AppController {
 		$this->set('attrDescriptions', $this->Attribute->fieldDescriptions);
 		$this->set('typeDefinitions', $this->Attribute->typeDefinitions);
 		$this->set('categoryDefinitions', $this->Attribute->categoryDefinitions);
+
+		$this->set('killChains', $this->Attribute->KillChain->find('list'));
 	}
 
 	public function download($id = null) {
@@ -605,6 +607,8 @@ class AttributesController extends AppController {
 		$this->set('attrDescriptions', $this->Attribute->fieldDescriptions);
 		$this->set('typeDefinitions', $this->Attribute->typeDefinitions);
 		$this->set('categoryDefinitions', $this->Attribute->categoryDefinitions);
+
+		$this->set('killChains', $this->Attribute->KillChain->find('list'));
 	}
 
 /**

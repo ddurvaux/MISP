@@ -39,12 +39,60 @@ class AppModel extends Model {
  * @var string
  */
 	public $name;
+    // @TODO: enable containable app wide and
+    // be specific about contains
+	//public $recursive = -1;
+
+    //public $actsAs = array('Containable');
 
 	public function __construct($id = false, $table = null, $ds = null) {
 		parent::__construct($id, $table, $ds);
 
 		$this->name = get_class($this);
 	}
+
+	/**
+     * Custom Model::find() for Ad-Hoc joins
+     *
+     */
+    public function find($type = null, $options = array()) {
+        if (!isset($options['joins'])) {
+            $options['joins'] = array();
+        }
+
+        switch ($type) {
+            case 'matches':
+                if (!isset($options['model']) || !isset($options['scope'])) {
+                    break;
+                }
+                $type = isset($options['operation']) ? $options['operation'] : 'all';
+
+                $assoc = $this->hasAndBelongsToMany[$options['model']];
+                $bind = "{$assoc['with']}.{$assoc['foreignKey']} = {$this->alias}.{$this->primaryKey}";
+
+                $options['joins'][] = array(
+                    'table' => $assoc['joinTable'],
+                    'alias' => $assoc['with'],
+                    'type' => 'inner',
+                    'foreignKey' => false,
+                    'conditions'=> array($bind)
+                );
+
+                $bind = $options['model'] . '.' . $this->{$options['model']}->primaryKey . ' = ';
+                $bind .= "{$assoc['with']}.{$assoc['associationForeignKey']}";
+
+                $options['joins'][] = array(
+                    'table' => $this->{$options['model']}->table,
+                    'alias' => $options['model'],
+                    'type' => 'inner',
+                    'foreignKey' => false,
+                    'conditions'=> array($bind) + (array)$options['scope'],
+                );
+                unset($options['model'], $options['scope']);
+                break;
+        }
+        return parent::find($type, $options);
+    }
 
 /**
  * generateAllFor<FieldName>

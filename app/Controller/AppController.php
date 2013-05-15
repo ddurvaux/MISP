@@ -50,6 +50,7 @@ class AppController extends Controller {
 	}
 
 	public $components = array(
+			'Settings.LoadSettings',
 			'Session',
 			'Auth' => array(
 				'className' => 'SecureAuth',
@@ -58,6 +59,11 @@ class AppController extends Controller {
 						'fields' => array('username' => 'email')
 					)
 				),
+				'loginAction' => array(
+	                'controller' => 'users',
+	                'action' => 'login',
+	                'admin' => false
+	            ),
 				'authError' => 'Unauthorised access.',
 				'loginRedirect' => array('controller' => 'users', 'action' => 'routeafterlogin'),
 				'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
@@ -66,7 +72,11 @@ class AppController extends Controller {
 				)
 	);
 
+	protected $isCTI = false;
+
 	public function beforeFilter() {
+		$this->isCTI = Configure::read('CyDefSIG.CTI');
+		if($this->isCTI) $this->layout = 'cti';
 		// user must accept terms
 		//
 		// TODO $this->Session->check('Auth.User') (16:32:45) andras.iklody@gmail.com: think this was documented as check('Auth')

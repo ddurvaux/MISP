@@ -364,6 +364,10 @@ class Attribute extends AppModel {
 			'fields' => '',
 			'order' => '',
 			'counterCache' => true
+		),
+		'KillChain' => array(
+			'className' => 'KillChain',
+			'foreignKey' => 'kill_chain_id'
 		)
 	);
 

@@ -1,24 +1,70 @@
 <div class="events form">
-<?php echo $this->Form->create('Event');?>
+<?php echo $this->Form->create('Event', array('type' => 'file'));?>
 	<fieldset>
 		<legend><?php echo __('Edit Event'); ?></legend>
 <?php
 echo $this->Form->input('id');
-echo $this->Form->input('date');
-echo $this->Form->input('risk', array(
-		'before' => $this->Html->div('forminfo', '', array('id' => 'EventRiskDiv'))));
-echo $this->Form->input('analysis', array(
-		'options' => array($analysisLevels),
-		'before' => $this->Html->div('forminfo', '', array('id' => 'EventAnalysisDiv'))));
+echo $this->Form->input('date', array(
+	'label' => __('Detect Date'),
+	'type' => 'text',
+	'class' => 'datepicker'
+));
+echo $this->Form->input('start_time', array(
+	'type' => 'text',
+	'class' => 'datepicker'
+));
+
+echo $this->Form->input('detect_place_id', array('options' => $organisations));
+echo $this->Form->input('detect_method_id');
+
+echo $this->Form->input('report_time', array(
+	'type' => 'text',
+	'class' => 'datepicker',
+	'div' => 'input clear'
+));
+
+echo $this->Form->input('end_time', array(
+	'type' => 'text',
+	'class' => 'datepicker'
+));
+
+echo $this->Form->input('reporter_organisation_id', array('options' => $organisations));
+echo $this->Form->input('report_channel_id', array('options' => $channels));
+
 if ('true' == Configure::read('CyDefSIG.sync')) {
-	if ('true' == $canEditDist) {
-		echo $this->Form->input('distribution', array('label' => 'Distribution',
+	if ('true' == Configure::read('CyDefSIG.private')) {
+		echo $this->Form->input('distribution', array('div' => 'input clear', 'label' => 'Distribution', 'selected' => 'All communities',
 			'between' => $this->Html->div('forminfo', '', array('id' => 'EventDistributionDiv'))
 		));
+	} else {
+		echo $this->Form->input('private', array(
+		'before' => $this->Html->div('forminfo', isset($eventDescriptions['private']['formdesc']) ? $eventDescriptions['private']['formdesc'] : $eventDescriptions['private']['desc']),));
 	}
 }
-echo $this->Form->input('info');
+echo $this->Form->input('SharingAuthorisation', array('type' => 'text'));
 
+echo $this->Form->input('risk', array(
+		'label' => 'Threat Level',
+		'div' => 'input clear',
+		'before' => $this->Html->div('forminfo', '', array('id' => 'EventRiskDiv'))));
+echo $this->Form->input('ThreatType', array('type' => 'text'));
+echo $this->Form->input('targeted_organisation_id', array('options' => $organisations));
+echo $this->Form->input('targeted_domain_id', array('options' => $domains));
+
+echo $this->Form->input('analysis', array(
+		'options' => array($analysisLevels),
+		'div' => 'input clear',
+		'before' => $this->Html->div('forminfo', '', array('id' => 'EventAnalysisDiv'))
+		));
+echo $this->Form->input('assessment_level_id');
+echo $this->Form->input('info', array('div' => 'clear', 'class' => 'input-xxlarge'));
+
+
+echo $this->Form->input('Event.submittedfile', array(
+		'label' => '<b>GFI sandbox</b>',
+		'between' => '<br />',
+		'type' => 'file',
+		'before' => $this->Html->div('forminfo', isset($eventDescriptions['submittedfile']['formdesc']) ? $eventDescriptions['submittedfile']['formdesc'] : $eventDescriptions['submittedfile']['desc'])));
 // link an onchange event to the form elements
 if ('true' == $canEditDist) {
 	$this->Js->get('#EventDistribution')->event('change', 'showFormInfo("#EventDistribution")');
@@ -27,7 +73,9 @@ $this->Js->get('#EventRisk')->event('change', 'showFormInfo("#EventRisk")');
 $this->Js->get('#EventAnalysis')->event('change', 'showFormInfo("#EventAnalysis")');
 ?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit', true));?>
+<?php
+echo $this->Form->button(__('Save'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>
@@ -70,9 +118,9 @@ function showFormInfo(id) {
 }
 
 // hide the formInfo things
-if ('true' == $canEditDist) {
-	$('#EventDistributionDiv').hide();
-}
+//if ('true' == $canEditDist) { // ???
+//	$('#EventDistributionDiv').hide();
+//}
 $('#EventRiskDiv').hide();
 $('#EventAnalysisDiv').hide();
 </script>
