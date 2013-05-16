@@ -9,9 +9,7 @@
         echo $this->Form->button('Go', array('class' => 'btn', 'div' => false));
         ?>
     </div>
-        <?php
-        echo $this->Form->end();
-	?>
+    <?php echo $this->Form->end(); ?>
 
 	<h2>Events</h2>
 	<table cellpadding="0" cellspacing="0" class="table table-striped table-condensed">

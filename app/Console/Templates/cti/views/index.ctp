@@ -63,6 +63,7 @@
 	?>"; ?>
 	</p>
 	<div class="pagination">
+		<ul>
 	<?php
 		echo "<?php\n";
 		echo "\t\techo \$this->Paginator->prev('&laquo; ' . __('previous'), array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'prev disabled', 'escape' => false, 'disabledTag' => 'span'));\n";
@@ -70,6 +71,7 @@
 		echo "\t\techo \$this->Paginator->next(__('next') . ' &raquo;', array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'next disabled', 'escape' => false, 'disabledTag' => 'span'));\n";
 		echo "\t?>\n";
 	?>
+	</ul>
 	</div>
 </div>
 

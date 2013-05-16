@@ -163,7 +163,7 @@ class AppSchema extends CakeSchema {
 		'reporter_organisation_id' => array('type' => 'integer', 'null' => true, 'default' => null),
 		'report_channel' => array('type' => 'text', 'null' => true, 'default' => null, 'collate' => 'utf8_bin', 'comment' => 'legacy', 'charset' => 'utf8'),
 		'reporter_channel_id' => array('type' => 'integer', 'null' => true, 'default' => null),
-		'report_notes' => array('type' => 'text', 'null' => true, 'default' => null, 'collate' => 'utf8_bin', 'charset' => 'utf8'),
+		'report_notes' => array('type' => 'string', 'null' => true, 'default' => null, 'collate' => 'utf8_bin', 'charset' => 'utf8'),
 		'Campaign-id' => array('type' => 'integer', 'null' => false, 'default' => null, 'comment' => 'legacy'),
 		'TTP_id' => array('type' => 'integer', 'null' => false, 'default' => null),
 		'TTPCat' => array('type' => 'text', 'null' => false, 'default' => null, 'collate' => 'utf8_bin', 'comment' => 'legacy', 'charset' => 'utf8'),

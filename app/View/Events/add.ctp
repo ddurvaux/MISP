@@ -27,12 +27,14 @@ echo $this->Form->input('end_time', array(
 	'class' => 'datepicker'
 ));
 
-echo $this->Form->input('reporter_organisation_id', array('options' => $organisations));
+echo $this->Form->input('reporter_organisation_id', array('options' => $organisations, 'label' => __('Reporter')));
 echo $this->Form->input('report_channel_id', array('options' => $channels));
+
+echo $this->Form->input('report_notes', array('div' => 'input clear'));
 
 if ('true' == Configure::read('CyDefSIG.sync')) {
 	if ('true' == Configure::read('CyDefSIG.private')) {
-		echo $this->Form->input('distribution', array('div' => 'input clear', 'label' => 'Distribution', 'selected' => 'All communities',
+		echo $this->Form->input('distribution', array('div' => 'input', 'label' => 'Distribution', 'selected' => 'All communities',
 			'between' => $this->Html->div('forminfo', '', array('id' => 'EventDistributionDiv'))
 		));
 	} else {

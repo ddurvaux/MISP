@@ -8,7 +8,8 @@
 		echo $this->Form->input('definition');
 	?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit')); ?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary')); ?>
+<?php echo $this->Form->end(); ?>
 </div>
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>

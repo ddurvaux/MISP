@@ -4,12 +4,16 @@
 		<legend><?php echo __('Add Organisation'); ?></legend>
 	<?php
 		echo $this->Form->input('name');
+		echo $this->Form->input('ID_legacy');
 		echo $this->Form->input('constituent_ref');
 		echo $this->Form->input('fullname');
+		echo $this->Form->input('cat');
 		echo $this->Form->input('organisation_category_id');
+		echo $this->Form->input('Type');
 		echo $this->Form->input('organisation_type_id');
 		echo $this->Form->input('sector');
 		echo $this->Form->input('sharing_group');
+		echo $this->Form->input('country');
 		echo $this->Form->input('country_id');
 		echo $this->Form->input('functional_contact');
 		echo $this->Form->input('PGP');
@@ -26,7 +30,8 @@
 		echo $this->Form->input('agreement_details');
 	?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit')); ?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary')); ?>
+<?php echo $this->Form->end(); ?>
 </div>
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>

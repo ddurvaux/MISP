@@ -16,11 +16,8 @@ if(!empty($me)) { ?>
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <!--<a href="#">Organisations <i class="icon-arrow-right"></i></a>-->
-                                <?php echo $this->Html->link(__('Organisations', true) . ' <i class="icon-arrow-right"></i>', array('controller' => 'Organisations', 'action' => 'index', 'plugin' => false), array('escape' => false)); ?>
+                                <?php echo $this->Html->link(__('Organisations', true) . ' <i class="icon-arrow-right"></i>', array('controller' => 'organisations', 'action' => 'index', 'plugin' => false), array('escape' => false)); ?>
                                 <ul class="dropdown-menu sub-menu">
-                                    <!--<li><?php echo $this->Html->link(__('Organisations', true), array('controller' => 'organisations', 'action' => 'index', 'plugin' => false)); ?></li>-->
-                                    <!--<li class="divider"></li>-->
                                     <li><?php echo $this->Html->link(__('Organisation Types', true), array('controller' => 'organisation_types', 'action' => 'index', 'plugin' => false)); ?></li>
                                     <li><?php echo $this->Html->link(__('Organisation Categories', true), array('controller' => 'organisation_categories', 'action' => 'index', 'plugin' => false)); ?></li>
                                     <!--<li><?php echo $this->Html->link(__('Organisation PGP Keys', true), array('controller' => 'OrganisationPGPKeys', 'action' => 'index', 'plugin' => false)); ?></li>-->

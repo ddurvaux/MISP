@@ -7,12 +7,27 @@ App::uses('AppController', 'Controller');
  */
 class OrganisationsController extends AppController {
 
+	public $paginate = array();
+
 /**
  * index method
  *
  * @return void
  */
 	public function index() {
+		if(!empty($this->request->data)){
+            $redirect = array('action' => 'index');
+            foreach($this->request->data['Organisation'] as $k => $v){
+                if(!empty($v)){
+                    $redirect[$k] = $v
+;                }
+            }
+            $this->redirect($redirect);
+        }
+        if(!empty($this->passedArgs['key'])){
+            $this->paginate['conditions'] = array('Organisation.name LIKE' => '%'.$this->passedArgs['key'].'%');
+        }
+
 		$this->paginte = array('contain' => array(
 			'OrganisationType', 'OrganisationCategory', 'Country'
 		));

@@ -37,6 +37,12 @@ if ($attachment) {
 			'error' => array('escape' => false),
 	));
 }
+
+echo $this->Form->input('kill_chain_id');
+echo $this->Form->input('blacklist', array('type' => 'checkbox'));
+echo $this->Form->input('malware_research', array('type' => 'checkbox'));
+echo $this->Form->input('vuln_manag', array('type' => 'checkbox'));
+
 $this->Js->get('#AttributeCategory')->event('change', 'formCategoryChanged("#AttributeCategory")');
 $this->Js->get('#AttributeType')->event('change', 'showFormInfo("#AttributeType")');
 if ($canEditDist) {

@@ -5,6 +5,7 @@
         <title><?php echo $title_for_layout, ' - ', Configure::read('App.name'); ?></title>
         <?php
         echo $this->Html->meta('icon');
+        echo $this->Html->css('roboto.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/roboto.css'));
         echo $this->Html->css('bootstrap.min.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/bootstrap.min.css'));
         echo $this->Html->css('datepicker.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/datepicker.css'));
         echo $this->Html->css('main.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/main.css'));

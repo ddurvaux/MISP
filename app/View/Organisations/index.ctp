@@ -1,19 +1,30 @@
+<?php if(empty($this->passedArgs['key'])) $this->passedArgs['key'] = '';?>
 <div class="organisations index">
+	<h2><?php echo __('Filters');?></h2>
+	<?php echo $this->Form->create('', array('action' => 'index')); ?>
+    <div class="input-append">
+        <?php
+        echo $this->Form->input('key', array('value' => $this->passedArgs['key'], 'div' => false, 'class' => 'input-xxlarge', 'label' => false));
+        echo $this->Form->button('Go', array('class' => 'btn', 'div' => false));
+        ?>
+    </div>
+    <?php echo $this->Form->end(); ?>
+
 	<h2><?php echo __('Organisations'); ?></h2>
-	<table cellpadding="0" cellspacing="0" class='table table-striped'>
+	<table cellpadding="0" cellspacing="0" class="table table-striped table-condensed">
 	<tr>
 			<th><?php echo $this->Paginator->sort('id'); ?></th>
 			<th><?php echo $this->Paginator->sort('name'); ?></th>
-
+			<th><?php echo $this->Paginator->sort('ID_legacy'); ?></th>
 			<th><?php echo $this->Paginator->sort('constituent_ref'); ?></th>
 			<th><?php echo $this->Paginator->sort('fullname'); ?></th>
-
+			<th><?php echo $this->Paginator->sort('cat'); ?></th>
 			<th><?php echo $this->Paginator->sort('organisation_category_id'); ?></th>
-
+			<th><?php echo $this->Paginator->sort('Type'); ?></th>
 			<th><?php echo $this->Paginator->sort('organisation_type_id'); ?></th>
 			<th><?php echo $this->Paginator->sort('sector'); ?></th>
 			<th><?php echo $this->Paginator->sort('sharing_group'); ?></th>
-
+			<th><?php echo $this->Paginator->sort('country'); ?></th>
 			<th><?php echo $this->Paginator->sort('country_id'); ?></th>
 			<th><?php echo $this->Paginator->sort('functional_contact'); ?></th>
 			<th><?php echo $this->Paginator->sort('PGP'); ?></th>
@@ -34,36 +45,22 @@
 	<tr>
 		<td><?php echo h($organisation['Organisation']['id']); ?>&nbsp;</td>
 		<td><?php echo h($organisation['Organisation']['name']); ?>&nbsp;</td>
-
+		<td><?php echo h($organisation['Organisation']['ID_legacy']); ?>&nbsp;</td>
 		<td><?php echo h($organisation['Organisation']['constituent_ref']); ?>&nbsp;</td>
 		<td><?php echo h($organisation['Organisation']['fullname']); ?>&nbsp;</td>
-
+		<td><?php echo h($organisation['Organisation']['cat']); ?>&nbsp;</td>
 		<td>
-			<?php
-			if(!empty($organisation['OrganisationCategory']['name'])){
-				echo $this->Html->link($organisation['OrganisationCategory']['name'], array('controller' => 'organisation_categories', 'action' => 'view', $organisation['OrganisationCategory']['id']));
-			}
-			?>
+			<?php echo $this->Html->link($organisation['OrganisationCategory']['name'], array('controller' => 'organisation_categories', 'action' => 'view', $organisation['OrganisationCategory']['id'])); ?>
 		</td>
-
+		<td><?php echo h($organisation['Organisation']['Type']); ?>&nbsp;</td>
 		<td>
-			<?php
-			if(!empty($organisation['OrganisationType']['name'])){
-			echo $this->Html->link($organisation['OrganisationType']['name'], array('controller' => 'organisation_types', 'action' => 'view', $organisation['OrganisationType']['id']));
-			}
-			?>
-			&nbsp;
+			<?php echo $this->Html->link($organisation['OrganisationType']['name'], array('controller' => 'organisation_types', 'action' => 'view', $organisation['OrganisationType']['id'])); ?>
 		</td>
 		<td><?php echo h($organisation['Organisation']['sector']); ?>&nbsp;</td>
 		<td><?php echo h($organisation['Organisation']['sharing_group']); ?>&nbsp;</td>
-
+		<td><?php echo h($organisation['Organisation']['country']); ?>&nbsp;</td>
 		<td>
-			<?php
-			if(!empty($organisation['Country']['name'])){
-				echo $this->Html->link($organisation['Country']['name'], array('controller' => 'countries', 'action' => 'view', $organisation['Country']['id']));
-			}
-			?>
-			&nbsp;
+			<?php echo $this->Html->link($organisation['Country']['name'], array('controller' => 'countries', 'action' => 'view', $organisation['Country']['id'])); ?>
 		</td>
 		<td><?php echo h($organisation['Organisation']['functional_contact']); ?>&nbsp;</td>
 		<td><?php echo h($organisation['Organisation']['PGP']); ?>&nbsp;</td>
@@ -92,14 +89,17 @@
 	'format' => __('Page {:page} of {:pages}, showing {:current} records out of {:count} total, starting on record {:start}, ending on {:end}')
 	));
 	?>	</p>
-	<div class="paging">
+	<div class="pagination">
+		<ul>
 	<?php
-		echo $this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'));
-		echo $this->Paginator->numbers(array('separator' => ''));
-		echo $this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'));
+		echo $this->Paginator->prev('&laquo; ' . __('previous'), array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'prev disabled', 'escape' => false, 'disabledTag' => 'span'));
+		echo $this->Paginator->numbers(array('modulus' => 20, 'separator' => '', 'tag' => 'li', 'currentClass' => 'active', 'currentTag' => 'span'));
+		echo $this->Paginator->next(__('next') . ' &raquo;', array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'next disabled', 'escape' => false, 'disabledTag' => 'span'));
 	?>
+	</ul>
 	</div>
 </div>
+
 <div class="actions">
 	<h3><?php echo __('Actions'); ?></h3>
 	<ul>

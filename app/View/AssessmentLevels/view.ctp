@@ -31,7 +31,7 @@
 </div>
 <div class="related">
 	<h3><?php echo __('Related Events'); ?></h3>
-	<?php if (!empty($assessmentLevel['Event'])): ?>
+	<?php if (!empty($assessmentLevel['Event'])){ ?>
 	<table cellpadding = "0" cellspacing = "0">
 	<tr>
 		<th><?php echo __('Id'); ?></th>
@@ -39,6 +39,7 @@
 		<th><?php echo __('Detect Place'); ?></th>
 		<th><?php echo __('Detect Place Id'); ?></th>
 		<th><?php echo __('Detect Method'); ?></th>
+		<th><?php echo __('Detect Method Id'); ?></th>
 		<th><?php echo __('Org'); ?></th>
 		<th><?php echo __('Date'); ?></th>
 		<th><?php echo __('Detect Time'); ?></th>
@@ -102,13 +103,14 @@
 	</tr>
 	<?php
 		$i = 0;
-		foreach ($assessmentLevel['Event'] as $event): ?>
+		foreach ($assessmentLevel['Event'] as $event){ ?>
 		<tr>
 			<td><?php echo $event['id']; ?></td>
 			<td><?php echo $event['Event-id']; ?></td>
 			<td><?php echo $event['detect_place']; ?></td>
 			<td><?php echo $event['detect_place_id']; ?></td>
 			<td><?php echo $event['detect_method']; ?></td>
+			<td><?php echo $event['detect_method_id']; ?></td>
 			<td><?php echo $event['org']; ?></td>
 			<td><?php echo $event['date']; ?></td>
 			<td><?php echo $event['detect_time']; ?></td>
@@ -174,9 +176,9 @@
 				<?php echo $this->Form->postLink(__('Delete'), array('controller' => 'events', 'action' => 'delete', $event['id']), null, __('Are you sure you want to delete # %s?', $event['id'])); ?>
 			</td>
 		</tr>
-	<?php endforeach; ?>
+	<?php } ?>
 	</table>
-<?php endif; ?>
+<?php } ?>
 
 	<div class="actions">
 		<ul>
