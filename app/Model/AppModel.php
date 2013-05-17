@@ -39,11 +39,9 @@ class AppModel extends Model {
  * @var string
  */
 	public $name;
-    // @TODO: enable containable app wide and
-    // be specific about contains
-	//public $recursive = -1;
 
-    //public $actsAs = array('Containable');
+	public $recursive = -1;
+    public $actsAs = array('Containable');
 
 	public function __construct($id = false, $table = null, $ds = null) {
 		parent::__construct($id, $table, $ds);

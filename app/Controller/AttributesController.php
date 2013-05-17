@@ -26,7 +26,7 @@ class AttributesController extends AppController {
 		if ('search' == $this->request->params['action']) {
 			$this->Security->csrfUseOnce = false;
 		}
-		$this->Security->validatePost = true;
+		//$this->Security->validatePost = true;
 
 		// convert uuid to id if present in the url, and overwrite id field
 		if (isset($this->params->query['uuid'])) {
@@ -81,9 +81,9 @@ class AttributesController extends AppController {
  * @throws NotFoundException // TODO Exception
  */
 	public function index() {
-		$this->Attribute->recursive = 0;
 		$this->set('isSearch', 0);
 
+		$this->Attribute->contain('Event.id', 'Event.orgc', 'Event.info', 'KillChain');
 		$this->set('attributes', $this->paginate());
 
 		$this->set('attrDescriptions', $this->Attribute->fieldDescriptions);
@@ -472,6 +472,7 @@ class AttributesController extends AppController {
 		if (!$this->Attribute->exists()) {
 			throw new NotFoundException(__('Invalid attribute'));
 		}
+
 		$this->Attribute->read();
 		//set stuff to fix undefined index: uuid
 		if (!$this->_isRest()) {
@@ -554,6 +555,7 @@ class AttributesController extends AppController {
 				}
 			}
 		} else {
+			$this->Attribute->contain('Event');
 			$this->request->data = $this->Attribute->read(null, $id);
 		}
 

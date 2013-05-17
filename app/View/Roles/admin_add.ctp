@@ -2,15 +2,16 @@
 <?php echo $this->Form->create('Role');?>
 	<fieldset>
 		<legend><?php echo __('Add Role'); ?></legend>
-	<?php
-		echo $this->Form->input('name');?>
+		<?php echo $this->Form->input('name');?>
+		<div class="clear">
 		<?php echo $this->Form->radio('permission', $options, array('value' => '3'));?>
 		<?php echo $this->Form->input('perm_sync', array('type' => 'checkbox', 'checked' => false));?>
 		<?php echo $this->Form->input('perm_admin', array('type' => 'checkbox', 'checked' => false));?>
 		<?php echo $this->Form->input('perm_audit', array('type' => 'checkbox', 'checked' => false));?>
 		<?php echo $this->Form->input('perm_auth', array('type' => 'checkbox', 'checked' => false));?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>

@@ -10,10 +10,12 @@ if ($isSearch == 1) {
 	if (isset($orgSearch) && $orgSearch != '' && $orgSearch != null) echo " created by the organisation \"<b>" . h($orgSearch) . "</b>\"";
 	echo ":</h4>";
 } ?>
-	<table cellpadding="0" cellspacing="0">
+	<table cellpadding="0" cellspacing="0" class="table table-striped table-condensed">
 	<tr>
+			<th><?php echo $this->Paginator->sort('id');?></th>
 			<th><?php echo $this->Paginator->sort('event_id');?></th>
 			<th><?php echo $this->Paginator->sort('category');?></th>
+			<th><?php echo $this->Paginator->sort('kill_chain_id');?></th>
 			<th><?php echo $this->Paginator->sort('type');?></th>
 			<th><?php echo $this->Paginator->sort('value');?></th>
 			<th<?php echo ' title="' . $attrDescriptions['signature']['desc'] . '"';?>>
@@ -35,8 +37,11 @@ if ($isSearch == 1) {
 	}
 
 foreach ($attributes as $attribute):
+
 	?>
 	<tr>
+		<td><?php echo $attribute['Attribute']['id']?></td>
+
 		<td class="short">
 			<div id="<?php echo $attribute['Attribute']['id']?>" title="<?php echo h($attribute['Event']['info'])?>">
 			<?php
@@ -49,10 +54,11 @@ foreach ($attributes as $attribute):
 			?>
 			</div>
 		</td>
-		<td title="<?php echo $categoryDefinitions[$attribute['Attribute']['category']]['desc'];?>" class="short" onclick="document.location ='
+		<td title="<?php echo $categoryDefinitions[$attribute['Attribute']['category']]['desc'];?>" class="short" onclick="document.location='
 		<?php echo $this->Html->url(array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']), true);?>';">
 		<?php echo h($attribute['Attribute']['category']); ?>&nbsp;</td>
-		<td title="<?php echo $typeDefinitions[$attribute['Attribute']['type']]['desc'];?>" class="short" onclick="document.location ='
+		<td><?php echo $attribute['KillChain']['kill_chain']?></td>
+		<td title="<?php echo $typeDefinitions[$attribute['Attribute']['type']]['desc'];?>" class="short" onclick="document.location='
 		<?php echo $this->Html->url(array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']), true);?>';">
 		<?php echo h($attribute['Attribute']['type']); ?>&nbsp;</td>
 		<td onclick="document.location ='<?php echo $this->Html->url(array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']), true);?>';">
@@ -74,10 +80,10 @@ foreach ($attributes as $attribute):
 		<?php echo $attribute['Attribute']['to_ids'] ? 'Yes' : 'No'; ?>&nbsp;</td>
 		<td class="actions"><?php
 	if ($isAdmin || ($isAclModify && $attribute['Event']['user_id'] == $me['id']) || ($isAclModifyOrg && $attribute['Event']['org'] == $me['org'])) {
-		echo $this->Html->link(__('Edit'), array('action' => 'edit', $attribute['Attribute']['id']), null);
-		echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $attribute['Attribute']['id']), null, __('Are you sure you want to delete this attribute?'));
+		echo $this->Html->link(__('Edit'), array('action' => 'edit', $attribute['Attribute']['id']), array('class' => 'btn'));
+		echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $attribute['Attribute']['id']), array('class' => 'btn'), __('Are you sure you want to delete this attribute?'));
 	}
-	echo $this->Html->link(__('View'), array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']));
+	echo $this->Html->link(__('View'), array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']), array('class' => 'btn'));
 	?>
 		</td>
 	</tr>
@@ -92,12 +98,14 @@ endforeach;
 	));
 	?>	</p>
 
-	<div class="paging">
-	<?php
-		echo $this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'));
-		echo $this->Paginator->numbers(array('separator' => ''));
-		echo $this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'));
-	?>
+	<div class="pagination">
+	<ul>
+		<?php
+			echo $this->Paginator->prev('&laquo; ' . __('previous'), array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'prev disabled', 'escape' => false, 'disabledTag' => 'span'));
+			echo $this->Paginator->numbers(array('modulus' => 20, 'separator' => '', 'tag' => 'li', 'currentClass' => 'active', 'currentTag' => 'span'));
+			echo $this->Paginator->next(__('next') . ' &raquo;', array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'next disabled', 'escape' => false, 'disabledTag' => 'span'));
+		?>
+		</ul>
 	</div>
 </div>
 <div class="actions">

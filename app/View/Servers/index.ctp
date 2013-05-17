@@ -1,6 +1,6 @@
 <div class="servers index">
 	<h2><?php echo __('Servers'); ?></h2>
-	<table cellpadding="0" cellspacing="0">
+	<table cellpadding="0" cellspacing="0" class="table table-striped table-condensed">
 	<tr>
 			<th><?php echo $this->Paginator->sort('push');?></th>
 			<th><?php echo $this->Paginator->sort('pull');?></th>
@@ -33,14 +33,14 @@ foreach ($servers as $server): ?>
 		<td class="actions">
 			<?php
 			$mayModify = ($me['org'] == 'ADMIN' || $me['org'] == $server['Server']['organization']) || ($isAdmin && ($server['Server']['organization'] == $me['org']));
-			if ($mayModify) echo $this->Html->link(__('Edit'), array('action' => 'edit', $server['Server']['id']), null);
-			if ($mayModify) echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $server['Server']['id']), null, __('Are you sure you want to delete # %s?', $server['Server']['id'])); ?>
+			if ($mayModify) echo $this->Html->link(__('Edit'), array('action' => 'edit', $server['Server']['id']), array('class' => 'btn'));
+			if ($mayModify) echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $server['Server']['id']), array('class' => 'btn'), __('Are you sure you want to delete # %s?', $server['Server']['id'])); ?>
 
 			<?php // if ($server['Server']['pull']) echo $this->Form->postLink(__('Pull'), array('action' => 'pull', $server['Server']['id']) ); ?>
 			<?php // if ($server['Server']['push']) echo $this->Form->postLink(__('Push'), array('action' => 'push', $server['Server']['id']) ); ?>
 
-			<?php if ($server['Server']['pull'] && $me['org'] == 'ADMIN') echo $this->Form->postLink(__('Pull All'), array('action' => 'pull', $server['Server']['id'], 'full') ); ?>
-			<?php if ($server['Server']['push'] && $me['org'] == 'ADMIN') echo $this->Form->postLink(__('Push All'), array('action' => 'push', $server['Server']['id'], 'full') ); ?>
+			<?php if ($server['Server']['pull'] && $me['org'] == 'ADMIN') echo $this->Form->postLink(__('Pull All'), array('action' => 'pull', $server['Server']['id'], 'full'), array('class' => 'btn') ); ?>
+			<?php if ($server['Server']['push'] && $me['org'] == 'ADMIN') echo $this->Form->postLink(__('Push All'), array('action' => 'push', $server['Server']['id'], 'full'), array('class' => 'btn') ); ?>
 		</td>
 	</tr>
 	<?php
@@ -53,12 +53,14 @@ endforeach; ?>
 	));
 	?>	</p>
 
-	<div class="paging">
-	<?php
-		echo $this->Paginator->prev('< ' . __('previous'), array(), null, array('class' => 'prev disabled'));
-		echo $this->Paginator->numbers(array('separator' => ''));
-		echo $this->Paginator->next(__('next') . ' >', array(), null, array('class' => 'next disabled'));
-	?>
+	<div class="pagination">
+		<ul>
+		<?php
+			echo $this->Paginator->prev('&laquo; ' . __('previous'), array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'prev disabled', 'escape' => false, 'disabledTag' => 'span'));
+			echo $this->Paginator->numbers(array('modulus' => 20, 'separator' => '', 'tag' => 'li', 'currentClass' => 'active', 'currentTag' => 'span'));
+			echo $this->Paginator->next(__('next') . ' &raquo;', array('tag' => 'li', 'escape' => false), null, array('tag' => 'li', 'class' => 'next disabled', 'escape' => false, 'disabledTag' => 'span'));
+		?>
+		</ul>
 	</div>
 
 </div>

@@ -20,25 +20,20 @@
     <body>
         <div id="container">
             <?php echo $this->element('cti_global_menu');?>
-
             <div class="container-fluid">
                 <div class="row-fluid">
-
                     <div class="span12">
                         <?php echo $this->Session->flash('auth'); ?>
                         <?php echo $this->Session->flash('error'); ?>
                         <?php echo $this->Session->flash('gpg'); ?>
                         <?php echo $this->Session->flash(); ?>
                         <?php echo $this->Session->flash('email'); ?>
-
-
                         <?php echo $this->fetch('content'); ?>
                     </div>
                 </div>
             </div>
             <?php echo $this->element('sql_dump');?>
         </div>
-
         <?php echo $this->Html->script(array(
                 /*'jquery-ui-1.10.3.custom.min',*/
                 'bootstrap.min',

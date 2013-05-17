@@ -23,7 +23,8 @@
 			));
 	?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>

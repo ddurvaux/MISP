@@ -216,18 +216,14 @@ class AppController extends Controller {
 
     // pass an action to this method for it to check the active user's access to the action
     public function checkAction($action = 'perm_sync') {
-        $this->loadModel('Role');
-        $this->Role->recursive = -1;
-        $role = $this->Role->findById($this->Auth->user('role_id'));
+        $role = ClassRegistry::init('Role')->findById($this->Auth->user('role_id'));
         if ($role['Role'][$action]) return true;
         return false;
     }
 
     // returns the role of the currently authenticated user as an array, used to set the permission variables for views in the AppController's beforeFilter() method
     public function getActions() {
-        $this->loadModel('Role');
-        $this->Role->recursive = -1;
-        $role = $this->Role->findById($this->Auth->user('role_id'));
+        $role = ClassRegistry::init('Role')->findById($this->Auth->user('role_id'));
         return $role['Role'];
     }
 
@@ -237,13 +233,9 @@ class AppController extends Controller {
  * @return boolean or user array
  */
     public function checkAuthUser($authkey) {
-        $this->loadModel('User');
-        $this->User->recursive = -1;
-        $user = $this->User->findByAuthkey($authkey);
+        $user = ClassRegistry::init('User')->findByAuthkey($authkey);
         if (isset($user['User'])) {
-            $this->loadModel('Role');
-            $this->Role->recursive = -1;
-            $role = $this->Role->findById($user['User']['role_id']);
+            $role = ClassRegistry::init('Role')->findById($user['User']['role_id']);
             if ($role['Role']['perm_auth']) {
                 return $user;
             }

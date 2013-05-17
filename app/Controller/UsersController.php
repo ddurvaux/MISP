@@ -26,7 +26,7 @@ class UsersController extends AppController {
 		parent::beforeFilter();
 
 		// what pages are allowed for non-logged-in users
-		$this->Auth->allow('login', 'logout');
+		//$this->Auth->allow('login', 'logout');
 	}
 
 /**

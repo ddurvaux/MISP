@@ -21,7 +21,6 @@ class ShadowAttribute extends AppModel {
 			//'userKey' => 'user_id',
 			//'change' => 'full'),
 		'Trim',
-		'Containable',
 		'Regexp' => array('fields' => array('value', 'value2')),
 		'Blacklist' => array('fields' => array('value'))
 	);

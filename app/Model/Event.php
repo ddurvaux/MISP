@@ -16,7 +16,6 @@ class Event extends AppModel {
 			'userKey' => 'user_id',
 			'change' => 'full'),
 		'Trim',
-		'Containable',
 		'Regexp' => array('fields' => array('info')),
 		'Blacklist' => array('fields' => array('info')),
 	);
@@ -456,6 +455,7 @@ class Event extends AppModel {
 		        'conditions' => $conditionsCorrelation,
 		        'recursive' => 0,
 		        'order' => array('Correlation.event_id DESC')));
+
 		$relatedAttributes = array();
 		foreach($correlations as $correlation) {
 		    $relatedAttributes[$correlation['Correlation']['1_attribute_id']][] = array(

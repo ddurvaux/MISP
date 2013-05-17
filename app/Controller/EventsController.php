@@ -61,7 +61,6 @@ class EventsController extends AppController {
         if (isset($this->params->query['uuid'])) {
             $params = array(
                     'conditions' => array('Event.uuid' => $this->params->query['uuid']),
-                    'recursive' => 0,
                     'fields' => 'Event.id'
             );
             $result = $this->Event->find('first', $params);
@@ -116,7 +115,9 @@ class EventsController extends AppController {
             $this->paginate['conditions'] = array('Event.info LIKE' => '%'.$this->passedArgs['key'].'%');
         }
 
-        $this->Event->contain('TargetedEntity', 'TargetedDomain');
+        $this->Event->contain('TargetedEntity.name', 'TargetedDomain.domain');
+
+        $this->paginate['fields'] = array('id', 'date', 'ThreatType', 'risk', 'info', 'CIMBL', 'published');
 
 
         $this->set('events', $this->paginate());
@@ -151,13 +152,11 @@ class EventsController extends AppController {
         // If the length of the id provided is 36 then it is most likely a Uuid - find the id of the event, change $id to it and proceed to read the event as if the ID was entered.
         $perm_publish = $this->checkAction('perm_publish');
         if (strlen($id) == 36) {
-            $this->Event->recursive = -1;
             $temp = $this->Event->findByUuid($id);
             if ($temp == null) throw new NotFoundException(__('Invalid event'));
             $id = $temp['Event']['id'];
         }
-        $this->Event->recursive = 2;
-        $this->Event->contain('Attribute', 'Attribute.ShadowAttribute', 'User.email');
+        $this->Event->contain('Attribute', 'Attribute.KillChain', 'Attribute.ShadowAttribute', 'User.email');
         $this->Event->id = $id;
         if (!$this->Event->exists()) {
             throw new NotFoundException(__('Invalid event'));
@@ -181,7 +180,7 @@ class EventsController extends AppController {
         }
         $this->set('analysisLevels', $this->Event->analysisLevels);
 
-        $this->loadModel('Attribute');
+        //$this->loadModel('Attribute');
         $relatedEvents = $this->Event->getRelatedEvents($this->Auth->user());
         $relatedAttributes = $this->Event->getRelatedAttributes($this->Auth->user());
 
@@ -190,7 +189,7 @@ class EventsController extends AppController {
                 //  for REST requests also add the encoded attachment
                 if ($this->Attribute->typeIsAttachment($attribute['type'])) {
                     //  LATER check if this has a serious performance impact on XML conversion and memory usage
-                    $encodedFile = $this->Attribute->base64EncodeAttachment($attribute);
+                    $encodedFile = $this->Event->Attribute->base64EncodeAttachment($attribute);
                     $attribute['data'] = $encodedFile;
                 }
             }
@@ -231,7 +230,7 @@ class EventsController extends AppController {
 
         // passing decriptions for model fields
         $this->set('eventDescriptions', $this->Event->fieldDescriptions);
-        $this->set('attrDescriptions', $this->Attribute->fieldDescriptions);
+        $this->set('attrDescriptions', $this->Event->Attribute->fieldDescriptions);
 
         $this->set('event', $this->Event->data);
         if(isset($remaining)) {
@@ -239,11 +238,11 @@ class EventsController extends AppController {
         }
         $this->set('relatedEvents', $relatedEvents);
 
-        $this->set('categories', $this->Attribute->validate['category']['rule'][1]);
+        $this->set('categories', $this->Event->Attribute->validate['category']['rule'][1]);
 
         // passing type and category definitions (explanations)
-        $this->set('typeDefinitions', $this->Attribute->typeDefinitions);
-        $this->set('categoryDefinitions', $this->Attribute->categoryDefinitions);
+        $this->set('typeDefinitions', $this->Event->Attribute->typeDefinitions);
+        $this->set('categoryDefinitions', $this->Event->Attribute->categoryDefinitions);
 
         $this->set('distributionDescriptions', $this->Event->distributionDescriptions);
 
@@ -450,7 +449,6 @@ class EventsController extends AppController {
         // check for if private and user not authorised to edit, go away
         if (!$this->_isSiteAdmin() && !$this->checkAction('perm_sync') && $this->Event->data['Event']['distribution'] == 'Your organization only') {
             if (($this->Event->data['Event']['org'] != $this->_checkOrg()) || !($this->checkAction('perm_modify'))) {
-                die('x');
                 $this->Session->setFlash(__('You are not authorised to do that.'));
                 $this->redirect(array('controller' => 'events', 'action' => 'index'));
             }
