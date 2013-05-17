@@ -44,7 +44,7 @@ if ('true' == Configure::read('CyDefSIG.sync')) {
 	}
 }
 echo $this->Form->input('SharingAuthorisation', array('type' => 'text'));
-echo $this->Form->input('SharingGroup', array('multiple' => 'checkbox', 'div' => 'clear'));
+echo $this->Form->input('SharingGroup', array('multiple' => 'checkbox', 'div' => 'clear', 'selected' => $selected_groups));
 
 echo $this->Form->input('risk', array(
 		'label' => 'Threat Level',

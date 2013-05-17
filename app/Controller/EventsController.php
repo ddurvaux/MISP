@@ -597,6 +597,7 @@ class EventsController extends AppController {
             }
         } else {
             if(!$this->checkAction('perm_modify')) $this->redirect(array('controller' => 'events', 'action' => 'index', 'admin' => false));
+            $this->Event->contain('SharingGroup');
             $this->request->data = $this->Event->read(null, $id);
         }
 
@@ -634,6 +635,9 @@ class EventsController extends AppController {
         $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
         $this->set('sharingGroups', $this->Event->SharingGroup->find('list'));
         $this->set('detectMethods', $this->Event->DetectMethod->find('list'));
+
+        $selected_groups = $this->Event->getSelectedItems($this->request->data['SharingGroup']);
+        $this->set(compact('selected_groups'));
     }
 
     /**

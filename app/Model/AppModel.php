@@ -134,4 +134,13 @@ class AppModel extends Model {
 
 		return false;
 	}
+
+    public function getSelectedItems($data, $field = 'name', $key = 'id'){
+        $return = array();
+        foreach ($data as $row) {
+            $return[$row[$field]] = $row[$key];
+        }
+        return $return;
+    }
+
 }
