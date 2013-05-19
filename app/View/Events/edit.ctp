@@ -44,12 +44,14 @@ if ('true' == Configure::read('CyDefSIG.sync')) {
 	}
 }
 echo $this->Form->input('SharingAuthorisation', array('type' => 'text'));
+echo $this->Form->input('CIMBL_id');
 echo $this->Form->input('SharingGroup', array('multiple' => 'checkbox', 'div' => 'clear', 'selected' => $selected_groups));
 
-echo $this->Form->input('risk', array(
+/*echo $this->Form->input('risk', array(
 		'label' => 'Threat Level',
 		'div' => 'input clear',
-		'before' => $this->Html->div('forminfo', '', array('id' => 'EventRiskDiv'))));
+		'before' => $this->Html->div('forminfo', '', array('id' => 'EventRiskDiv'))));*/
+echo $this->Form->input('threat_level_id');
 echo $this->Form->input('ThreatType', array('type' => 'text'));
 echo $this->Form->input('targeted_organisation_id', array('options' => $organisations));
 echo $this->Form->input('targeted_domain_id', array('options' => $domains));

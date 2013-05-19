@@ -11,7 +11,7 @@ if(!empty($me)) { ?>
 
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            Name needed
+                            General
                             <b class="caret"></b>
                         </a>
                         <ul class="dropdown-menu">
@@ -24,10 +24,24 @@ if(!empty($me)) { ?>
 
                                 </ul>
                             </li>
+                            <li><?php echo $this->Html->link(__('Sharing Groups', true), array('controller' => 'sharing_groups', 'action' => 'index', 'plugin' => false)); ?> </li>
+                            <li><?php echo $this->Html->link(__('TLP', true), array('controller' => 'TLPs', 'action' => 'index', 'plugin' => false)); ?> </li>
+                            <li><?php echo $this->Html->link(__('Sensitivities', true), array('controller' => 'Sensitivities', 'action' => 'index', 'plugin' => false)); ?> </li>
+                            <li><?php echo $this->Html->link(__('CIMBL', true), array('controller' => 'CIMBLs', 'action' => 'index', 'plugin' => false)); ?> </li>
+                        </ul>
+                    </li>
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            Incident properties
+                            <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+
                             <li><?php echo $this->Html->link(__('Domains', true), array('controller' => 'domains', 'action' => 'index', 'plugin' => false)); ?> </li>
                             <li><?php echo $this->Html->link(__('Reporting Channel', true), array('controller' => 'reporting_channels', 'action' => 'index', 'plugin' => false)); ?> </li>
                             <li><?php echo $this->Html->link(__('Detect Methods', true), array('controller' => 'detect_methods', 'action' => 'index', 'plugin' => false)); ?> </li>
-                            <li><?php echo $this->Html->link(__('Sharing Groups', true), array('controller' => 'sharing_groups', 'action' => 'index', 'plugin' => false)); ?> </li>
+                            <li><?php echo $this->Html->link(__('Threat Levels', true), array('controller' => 'threat_levels', 'action' => 'index', 'plugin' => false)); ?> </li>
                         </ul>
                     </li>
 

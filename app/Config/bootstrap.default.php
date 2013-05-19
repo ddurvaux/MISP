@@ -96,6 +96,9 @@
  *		'persistent' => true, // [optional] set this to false for non-persistent connections
  *	));
  */
+Configure::write('UrlCache.active', true);
+Configure::write('UrlCache.pageFiles', true);
+Configure::write('UrlCache.verbosePrefixes', true);
 Cache::config('default', array('engine' => 'File'));
 
 //Configure::write('CyDefSIG.baseurl', 'https://sig.cyber-defence.be');
@@ -205,7 +208,10 @@ CakePlugin::load('SysLog');
 CakePlugin::load('Assets'); // having Logable
 CakePlugin::load('SysLogLogable');
 CakePlugin::load('MagicTools'); // having OrphansProtectable
-
+CakePlugin::load(array(
+    'Settings',
+    'UrlCache'
+));
 /**
  * You can attach event listeners to the request lifecyle as Dispatcher Filter . By Default CakePHP bundles two filters:
  *

@@ -46,10 +46,9 @@
             <th><?php echo $this->Paginator->sort('targeted_organisation_id');?></th>
             <th><?php echo $this->Paginator->sort('targeted_domain_id');?></th>
             <th><?php echo $this->Paginator->sort('ThreatType');?></th>
-            <th<?php echo ' title="' . $eventDescriptions['risk']['desc'] . '"';?>>
-            <?php echo $this->Paginator->sort('risk', 'Threat Level');?></th>
+            <th><?php echo $this->Paginator->sort('threat_level');?></th>
             <th><?php echo $this->Paginator->sort('info');?></th>
-            <th><?php echo $this->Paginator->sort('CIMBL');?></th>
+            <th><?php echo $this->Paginator->sort('CIMBL_id');?></th>
             <th class="actions"><?php echo __('Actions');?></th>
     </tr><?php
 foreach ($events as $event):?>
@@ -74,12 +73,30 @@ foreach ($events as $event):?>
         <td onclick="document.location ='<?php echo $this->Html->url(array('action' => 'view', $event['Event']['id']), true);?>';">
         <?php echo $event['Event']['ThreatType']; ?>&nbsp;</td>
         <td onclick="document.location ='<?php echo $this->Html->url(array('action' => 'view', $event['Event']['id']), true);?>';">
-        <?php echo $event['Event']['risk']; ?>&nbsp;</td>
+        <?php echo $event['ThreatLevel']['name']; ?>&nbsp;</td>
         <td onclick="document.location ='<?php echo $this->Html->url(array('action' => 'view', $event['Event']['id']), true);?>';">
         <?php echo nl2br($event['Event']['info']); ?>&nbsp;</td>
 
-        <td onclick="document.location ='<?php echo $this->Html->url(array('action' => 'view', $event['Event']['id']), true);?>';">
-        <?php echo $event['Event']['CIMBL']; ?>&nbsp;</td>
+        <td>
+            <?php
+            echo $this->Form->create('Event', array(
+                'action' => 'updateCIMBL.json',
+                'class' => 'updateCIMBLForm'));
+            echo $this->Form->input('CIMBL_id', array(
+                'selected' => $event['Event']['CIMBL_id'],
+                'empty' => __('None'),
+                'label' => false,
+                'style' => 'width:auto;',
+                'id' => '',
+                'class' => 'updateCIMBL',
+                'div' => false
+                )
+            );
+            echo $this->Form->hidden('id', array('value' => $event['Event']['id']));
+            echo $this->Form->end();
+
+            ?>
+        &nbsp;</td>
 
         <td class="actions">
             <?php

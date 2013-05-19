@@ -10,7 +10,9 @@
         echo $this->Html->css('datepicker.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/datepicker.css'));
         echo $this->Html->css('main.css?'.filemtime(dirname(__FILE__) . '/../../webroot/css/main.css'));
         // @FIXME: move before </body>
-        echo $this->Html->script(array('jquery-1.9.1.min'));
+        echo $this->Html->script(array(
+            'jquery-1.9.1.min.js?'.filemtime(dirname(__FILE__) . '/../../webroot/js/jquery-1.9.1.min.js')
+        ));
         echo $this->fetch('meta');
         echo $this->fetch('css');
         echo $this->fetch('script');
@@ -36,8 +38,8 @@
         </div>
         <?php echo $this->Html->script(array(
                 /*'jquery-ui-1.10.3.custom.min',*/
-                'bootstrap.min',
-                'bootstrap-datepicker',
+                'bootstrap.min.js?'.filemtime(dirname(__FILE__) . '/../../webroot/js/bootstrap.min.js'),
+                'bootstrap-datepicker.js?'.filemtime(dirname(__FILE__) . '/../../webroot/js/bootstrap-datepicker.js'),
                 'main.js?'.filemtime(dirname(__FILE__) . '/../../webroot/js/main.js')
             ));
         ?>

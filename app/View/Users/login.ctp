@@ -5,7 +5,7 @@
             echo $this->Form->create('User');
             echo $this->Form->inputs(array(
                 'legend' => __('Login', true),
-                'email' => array('autocomplete' => 'off'),
+                'email' => array('autocomplete' => 'on'),
                 'password' => array('autocomplete' => 'off')
             ));
             echo $this->Form->button(__('Login'), array('class' => 'btn btn-primary'));

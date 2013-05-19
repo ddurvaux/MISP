@@ -51,6 +51,7 @@ class AppModel extends Model {
 
 	/**
      * Custom Model::find() for Ad-Hoc joins
+     * @TODO: add query cache
      *
      */
     public function find($type = null, $options = array()) {

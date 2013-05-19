@@ -38,10 +38,10 @@ class EventsController extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
 
-        /*if($this->request->action == 'edit'){
+        if($this->request->action == 'updateCIMBL'){
             $this->Security->validatePost = false;
             $this->Security->csrfCheck = false;
-        }*/
+        }
 
         // what pages are allowed for non-logged-in users
         $this->Auth->allow('xml');
@@ -100,8 +100,6 @@ class EventsController extends AppController {
      * @return void
      */
     public function index() {
-        // list the events
-        //$this->Event->recursive = 0;
         if(!empty($this->request->data)){
             $redirect = array('action' => 'index');
             foreach($this->request->data['Event'] as $k => $v){
@@ -115,9 +113,9 @@ class EventsController extends AppController {
             $this->paginate['conditions'] = array('Event.info LIKE' => '%'.$this->passedArgs['key'].'%');
         }
 
-        $this->Event->contain('TargetedEntity.name', 'TargetedDomain.domain');
+        $this->Event->contain('TargetedEntity.name', 'TargetedDomain.domain', 'ThreatLevel.name');
 
-        $this->paginate['fields'] = array('id', 'date', 'ThreatType', 'risk', 'info', 'CIMBL', 'published');
+        $this->paginate['fields'] = array('id', 'date', 'ThreatType', 'risk', 'info', 'CIMBL_id', 'published');
 
 
         $this->set('events', $this->paginate());
@@ -126,6 +124,7 @@ class EventsController extends AppController {
         }
         $this->set('eventDescriptions', $this->Event->fieldDescriptions);
         $this->set('analysisLevels', $this->Event->analysisLevels);
+        $this->set('cIMBLs', $this->Event->CIMBL->find('list'));
     }
 
     /**
@@ -156,7 +155,11 @@ class EventsController extends AppController {
             if ($temp == null) throw new NotFoundException(__('Invalid event'));
             $id = $temp['Event']['id'];
         }
-        $this->Event->contain('Attribute', 'Attribute.KillChain', 'Attribute.ShadowAttribute', 'User.email');
+        $this->Event->contain(
+            'Attribute', 'Attribute.KillChain', 'Attribute.ShadowAttribute',
+            'ThreatLevel.name', 'TargetedEntity.name', 'TargetedDomain.domain',
+            'User.email', 'CIMBL.name', 'SharingGroup.name', 'DetectMethod.name',
+            'DetectPlace.name', 'ReportingChannel.reporting_channel', 'AssessmentLevel.name');
         $this->Event->id = $id;
         if (!$this->Event->exists()) {
             throw new NotFoundException(__('Invalid event'));
@@ -352,6 +355,7 @@ class EventsController extends AppController {
         $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
         $this->set('sharingGroups', $this->Event->SharingGroup->find('list'));
         $this->set('detectMethods', $this->Event->DetectMethod->find('list'));
+        $this->set('threatLevels', $this->Event->ThreatLevel->find('list'));
     }
 
     /**
@@ -408,7 +412,7 @@ class EventsController extends AppController {
         }
 
         if($this->isCTI){
-            $fieldList['Event'] = array_merge($fieldList['Event'], array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id', 'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes')
+            $fieldList['Event'] = array_merge($fieldList['Event'], array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id', 'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes', 'threat_level_id', 'CIMBL_id')
             );
         }
 
@@ -500,7 +504,7 @@ class EventsController extends AppController {
                 );
 
                 if($this->isCTI){
-                    $fieldList['Event'] = array_merge($fieldList['Event'], array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id', 'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes')
+                    $fieldList['Event'] = array_merge($fieldList['Event'], array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id', 'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes', 'threat_level_id', 'CIMBL_id')
                     );
                 }
 
@@ -567,7 +571,7 @@ class EventsController extends AppController {
 
             if($this->isCTI){
                 $fieldList = array_merge($fieldList, array('start_time', 'end_time', 'detect_place_id', 'detect_method_id', 'report_time', 'reporter_organisation_id',
-                    'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes'
+                    'reporter_channel_id', 'SharingAuthorisation', 'ThreatType', 'targeted_organisation_id', 'targeted_domain_id', 'assessment_level_id', 'report_notes', 'threat_level_id', 'CIMBL_id'
                 ));
             }
 
@@ -635,6 +639,8 @@ class EventsController extends AppController {
         $this->set('assessmentLevels', $this->Event->AssessmentLevel->find('list'));
         $this->set('sharingGroups', $this->Event->SharingGroup->find('list'));
         $this->set('detectMethods', $this->Event->DetectMethod->find('list'));
+        $this->set('threatLevels', $this->Event->ThreatLevel->find('list'));
+        $this->set('cIMBLs', $this->Event->CIMBL->find('list'));
 
         $selected_groups = $this->Event->getSelectedItems($this->request->data['SharingGroup']);
         $this->set(compact('selected_groups'));
@@ -1197,6 +1203,20 @@ class EventsController extends AppController {
         // generate the list of Attribute types
         $this->loadModel('Attribute');
         $this->set('sigTypes', array_keys($this->Attribute->typeDefinitions));
+    }
+
+    public function downloadXML($id = null){
+        $e = $this->Event->find('first', array(
+            'conditions' => array('Event.id' => $id),
+            'contain' => array(
+                'Attribute' => array('KillChain'),
+                'TargetedDomain',
+                'ThreatLevel',
+
+            )
+        ));
+        $this->set('event', $e);
+        $this->response->download('misp.export.event.'.$e['Event']['id'].'.xml');
     }
 
     public function xml($key, $eventid=null) {
@@ -1807,17 +1827,15 @@ class EventsController extends AppController {
         $this->set('final', $final);
     }
 
-    public function downloadCimbl($id){
-        $this->response->type('xml');
+    public function updateCIMBL(){
         $this->autoRender = false;
-
-        $this->Event->contain(array('Attribute'));
-        $event = $this->Event->read(null, $id);
-
-        die(debug($event));
-
-        $xmlArray = array('cimbl' => array());
-
+        if($this->request->is('post')){
+            $this->Event->Behaviors->unload('SysLogLogable.SysLogLogable');
+            $this->Event->id = $this->request->data['Event']['id'];
+            if(!$this->Event->saveField('CIMBL_id', $this->request->data['Event']['CIMBL_id'], false)){
+                echo json_encode(array('msg' => 'Could not update CIMBL'));
+            }
+        }
 
     }
 }
