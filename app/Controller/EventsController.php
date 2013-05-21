@@ -26,7 +26,7 @@ class EventsController extends AppController {
     );
 
     public $paginate = array(
-            'limit' => 60,
+            'limit' => 40,
             //'maxLimit' => 9999,   // LATER we will bump here on a problem once we have more than 9999 events <- no we won't, this is the max a user van view/page.
             'order' => array(
                     'Event.id' => 'DESC'
@@ -109,6 +109,7 @@ class EventsController extends AppController {
             }
             $this->redirect($redirect);
         }
+
         if(!empty($this->passedArgs['key'])){
             $this->paginate['conditions'] = array('Event.info LIKE' => '%'.$this->passedArgs['key'].'%');
         }

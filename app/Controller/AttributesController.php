@@ -536,7 +536,7 @@ class AttributesController extends AppController {
 				}
 			}
 			if ($this->Attribute->save($this->request->data)) {
-				$this->Session->setFlash(__('The attribute has been saved'));
+				$this->Session->setFlash(('The attribute has been saved.'), 'default', array('class' => 'alert alert-success'));
 				// remove the published flag from the event
 				$this->Event->saveField('published', 0);
 
@@ -549,7 +549,7 @@ class AttributesController extends AppController {
 				}
 			} else {
 				if (!CakeSession::read('Message.flash')) {
-					$this->Session->setFlash(__('The attribute could not be saved. Please, try again.'));
+					$this->Session->setFlash(__('The attribute could not be saved. Please, try again.'), 'default', array('class' => 'alert alert-error'));
 				} else {
 					$this->request->data = $this->Attribute->read(null, $id);
 				}

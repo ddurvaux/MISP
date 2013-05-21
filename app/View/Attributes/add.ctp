@@ -34,7 +34,7 @@ echo $this->Form->input('value', array(
 			'class' => 'input-xxlarge'
 ));
 
-echo $this->Form->input('kill_chain_id');
+echo $this->Form->input('kill_chain_id', array('default' => 8));
 echo $this->Form->input('blacklist', array('type' => 'checkbox'));
 echo $this->Form->input('malware_research', array('type' => 'checkbox'));
 echo $this->Form->input('vuln_manag', array('type' => 'checkbox'));

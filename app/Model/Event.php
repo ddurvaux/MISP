@@ -79,7 +79,7 @@ class Event extends AppModel {
                 'rule' => array('notempty'),
                 //'message' => 'Your custom message here',
                 //'allowEmpty' => false,
-                //'required' => false,
+                'required' => false,
                 //'last' => false, // Stop validation after this rule
                 //'on' => 'create', // Limit validation to 'create' or 'update' operations
             ),
@@ -89,7 +89,7 @@ class Event extends AppModel {
                 'rule' => array('notempty'),
                 //'message' => 'Your custom message here',
                 //'allowEmpty' => false,
-                //'required' => false,
+                'required' => false,
                 //'last' => false, // Stop validation after this rule
                 //'on' => 'create', // Limit validation to 'create' or 'update' operations
             ),
@@ -108,7 +108,7 @@ class Event extends AppModel {
                 'rule' => array('inList', array('Undefined', 'Low','Medium','High')),
                 'message' => 'Options : Undefined, Low, Medium, High',
                 //'allowEmpty' => false,
-                'required' => true,
+                'required' => false,
                 //'last' => false, // Stop validation after this rule
                 //'on' => 'create', // Limit validation to 'create' or 'update' operations
         ),
@@ -140,22 +140,12 @@ class Event extends AppModel {
                 //'on' => 'create', // Limit validation to 'create' or 'update' operations
             ),
         ),
-        'user_id' => array(
-            'numeric' => array(
-                'rule' => array('numeric'),
-                //'message' => 'Your custom message here',
-                //'allowEmpty' => false,
-                //'required' => false,
-                //'last' => false, // Stop validation after this rule
-                //'on' => 'create', // Limit validation to 'create' or 'update' operations
-            ),
-        ),
         'published' => array(
             'boolean' => array(
                 'rule' => array('boolean'),
                 //'message' => 'Your custom message here',
                 //'allowEmpty' => false,
-                //'required' => false,
+                'required' => false,
                 //'last' => false, // Stop validation after this rule
                 //'on' => 'create', // Limit validation to 'create' or 'update' operations
             ),

@@ -19,19 +19,27 @@ class OrganisationsController extends AppController {
             $redirect = array('action' => 'index');
             foreach($this->request->data['Organisation'] as $k => $v){
                 if(!empty($v)){
-                    $redirect[$k] = $v
-;                }
+                    $redirect[$k] = $v;
+                }
             }
             $this->redirect($redirect);
         }
+        $cond = array();
+
         if(!empty($this->passedArgs['key'])){
-            $this->paginate['conditions'] = array('Organisation.name LIKE' => '%'.$this->passedArgs['key'].'%');
+            $cond += array('Organisation.name LIKE' => '%'.$this->passedArgs['key'].'%');
+        }
+        if(!empty($this->passedArgs['organisation_category_id'])){
+            $cond += array('Organisation.organisation_category_id' => $this->passedArgs['organisation_category_id']);
         }
 
         $this->paginate = array('contain' => array(
-            'OrganisationType', 'OrganisationCategory', 'Country'
-        ));
+            'OrganisationType', 'OrganisationCategory', 'Country', 'User'
+            ),
+            'conditions' => $cond
+        );
         $this->set('organisations', $this->paginate());
+        $this->set('organisationCategories', $this->Organisation->OrganisationCategory->find('list'));
     }
 
 /**
@@ -70,7 +78,8 @@ class OrganisationsController extends AppController {
         $organisationCategories = $this->Organisation->OrganisationCategory->find('list');
         $organisationTypes = $this->Organisation->OrganisationType->find('list');
         $countries = $this->Organisation->Country->find('list');
-        $this->set(compact('organisationCategories', 'organisationTypes', 'countries'));
+        $users = $this->Organisation->User->find('list');
+        $this->set(compact('organisationCategories', 'organisationTypes', 'countries', 'users'));
     }
 
 /**
@@ -98,7 +107,8 @@ class OrganisationsController extends AppController {
         $organisationCategories = $this->Organisation->OrganisationCategory->find('list');
         $organisationTypes = $this->Organisation->OrganisationType->find('list');
         $countries = $this->Organisation->Country->find('list');
-        $this->set(compact('organisationCategories', 'organisationTypes', 'countries'));
+        $users = $this->Organisation->User->find('list');
+        $this->set(compact('organisationCategories', 'organisationTypes', 'countries', 'users'));
     }
 
 /**

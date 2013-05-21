@@ -12,13 +12,9 @@
     <?php echo $this->Form->end(); ?>
 
     <h2>Events</h2>
-
-
-
     <div class="pagination">
         <ul>
         <?php
-
         $this->Paginator->options(array(
             'update' => '.span12',
             'evalScripts' => true,
