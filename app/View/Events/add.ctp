@@ -13,7 +13,7 @@ echo $this->Form->input('start_time', array(
     'class' => 'datepicker'
 ));
 
-echo $this->Form->input('detect_place_id', array('options' => $organisations));
+echo $this->Form->input('detect_place_id', array('options' => $organisations, 'default' => 512));
 echo $this->Form->input('detect_method');
 
 echo $this->Form->input('report_time', array(
@@ -27,31 +27,25 @@ echo $this->Form->input('end_time', array(
     'class' => 'datepicker'
 ));
 
-echo $this->Form->input('reporter_organisation_id', array('options' => $organisations, 'label' => __('Reporter')));
+echo $this->Form->input('reporter_organisation_id', array(
+    'options' => $organisations,
+    'default' => 512,
+    'label' => __('Reporter'))
+);
 echo $this->Form->input('report_channel_id', array('options' => $channels));
 
-echo $this->Form->input('report_notes', array('div' => 'input clear'));
 
-if ('true' == Configure::read('CyDefSIG.sync')) {
-    if ('true' == Configure::read('CyDefSIG.private')) {
-        echo $this->Form->input('distribution', array('div' => 'input', 'label' => 'Distribution', 'selected' => 'All communities',
-            'between' => $this->Html->div('forminfo', '', array('id' => 'EventDistributionDiv'))
-        ));
-    } else {
-        echo $this->Form->input('private', array(
-        'before' => $this->Html->div('forminfo', isset($eventDescriptions['private']['formdesc']) ? $eventDescriptions['private']['formdesc'] : $eventDescriptions['private']['desc']),));
-    }
-}
-echo $this->Form->input('SharingAuthorisation', array('type' => 'text'));
-echo $this->Form->input('SharingGroup', array('multiple' => 'checkbox', 'div' => 'clear'));
+
+
+echo $this->Form->input('SharingGroup', array('multiple' => 'checkbox', 'div' => 'input clear'));
 
 /*echo $this->Form->input('risk', array(
         'label' => 'Threat Level',
         'div' => 'input clear',
         'before' => $this->Html->div('forminfo', '', array('id' => 'EventRiskDiv'))));*/
-echo $this->Form->input('threat_level_id');
+echo $this->Form->input('threat_level_id', array('div' => 'input clear'));
 echo $this->Form->input('ThreatType', array('type' => 'text'));
-echo $this->Form->input('targeted_organisation_id', array('options' => $organisations));
+echo $this->Form->input('targeted_organisation_id', array('options' => $organisations, 'default' => 512));
 echo $this->Form->input('targeted_domain_id', array('options' => $domains));
 
 echo $this->Form->input('analysis', array(
@@ -60,6 +54,22 @@ echo $this->Form->input('analysis', array(
         'before' => $this->Html->div('forminfo', '', array('id' => 'EventAnalysisDiv'))
         ));
 echo $this->Form->input('assessment_level_id');
+
+if ('true' == Configure::read('CyDefSIG.sync')) {
+    if ('true' == Configure::read('CyDefSIG.private')) {
+        echo $this->Form->input('distribution', array('div' => 'input', 'label' => 'Distribution', 'selected' => 'Your organization only',
+            'between' => $this->Html->div('forminfo', '', array('id' => 'EventDistributionDiv'))
+        ));
+    } else {
+        echo $this->Form->input('private', array(
+        'before' => $this->Html->div('forminfo', isset($eventDescriptions['private']['formdesc']) ? $eventDescriptions['private']['formdesc'] : $eventDescriptions['private']['desc']),));
+    }
+}
+echo $this->Form->input('SharingAuthorisation', array('type' => 'text'));
+
+echo $this->Form->input('CIMBL_id', array('empty' => __('None'), 'div' => 'clear'));
+
+echo $this->Form->input('report_notes', array('div' => 'clear', 'class' => 'input-xxlarge'));
 echo $this->Form->input('info', array('div' => 'clear', 'class' => 'input-xxlarge'));
 
 

@@ -7,9 +7,9 @@ body{
 input, button, select, textarea{
     font-family: "RobotoLight"
 }
-.close{
+/*.close{
     float:none;
-}
+}*/
 
 h2{
     font-size: 25px;
@@ -19,8 +19,13 @@ h3{
     font-size: 18px;
     line-height: 20px;
 }
+.navbar-lab .navbar-inner{
+    background: #FF9900;
 
-
+}
+.navbar-lab .nav > li > a{
+    text-shadow: none;
+}
 
 /* MULTI-LEVEL DROPDOWNS FOR BOOTSTRAP */
 .dropdown-menu .sub-menu {
@@ -63,19 +68,19 @@ h3{
 div.form,
 div.index,
 div.view {
-	float:right;
-	width:85%;
-	border-left:1px solid #666;
-	padding:10px 1%;
+  float:right;
+  width:85%;
+  border-left:1px solid #666;
+  padding:10px 1%;
 }
 div.actions {
-	float:left;
-	width:10%;
-	padding:10px 1%;
+  float:left;
+  width:10%;
+  padding:10px 1%;
 }
 div.actions h3 {
-	padding-top:0;
-	color:#777;
+  padding-top:0;
+  color:#777;
 }
 
 div.input{

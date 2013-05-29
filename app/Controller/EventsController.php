@@ -100,6 +100,7 @@ class EventsController extends AppController {
      * @return void
      */
     public function index() {
+
         if(!empty($this->request->data)){
             $redirect = array('action' => 'index');
             foreach($this->request->data['Event'] as $k => $v){
@@ -115,8 +116,8 @@ class EventsController extends AppController {
         }
 
         $this->Event->contain('TargetedEntity.name', 'TargetedDomain.domain', 'ThreatLevel.name');
-
         $this->paginate['fields'] = array('id', 'date', 'ThreatType', 'risk', 'info', 'CIMBL_id', 'published');
+
 
 
         $this->set('events', $this->paginate());
@@ -149,6 +150,7 @@ class EventsController extends AppController {
      * @throws NotFoundException
      */
     public function view($id = null) {
+
         // If the length of the id provided is 36 then it is most likely a Uuid - find the id of the event, change $id to it and proceed to read the event as if the ID was entered.
         $perm_publish = $this->checkAction('perm_publish');
         if (strlen($id) == 36) {
@@ -157,6 +159,7 @@ class EventsController extends AppController {
             $id = $temp['Event']['id'];
         }
         $this->Event->contain(
+            'User.email',
             'Attribute', 'Attribute.KillChain', 'Attribute.ShadowAttribute',
             'ThreatLevel.name', 'TargetedEntity.name', 'TargetedDomain.domain',
             'User.email', 'CIMBL.name', 'SharingGroup.name', 'DetectMethod.name',
@@ -166,6 +169,7 @@ class EventsController extends AppController {
             throw new NotFoundException(__('Invalid event'));
         }
         $this->Event->read(null, $id);
+        //die(debug($this->Event->data));
         $userEmail = $this->Event->data['User']['email'];
         unset ($this->Event->data['User']);
         $this->Event->data['User']['email'] = $userEmail;
@@ -225,6 +229,7 @@ class EventsController extends AppController {
                     'conditions' => $conditions
             ));
         }
+
 
         // params for the jQuery RESTfull interface
         $this->set('authkey', $this->Auth->user('authkey'));
@@ -1206,18 +1211,17 @@ class EventsController extends AppController {
         $this->set('sigTypes', array_keys($this->Attribute->typeDefinitions));
     }
 
-    public function downloadXML($id = null){
+    public function download($id = null){
         $e = $this->Event->find('first', array(
             'conditions' => array('Event.id' => $id),
             'contain' => array(
                 'Attribute' => array('KillChain'),
                 'TargetedDomain',
                 'ThreatLevel',
-
             )
         ));
         $this->set('event', $e);
-        $this->response->download('misp.export.event.'.$e['Event']['id'].'.xml');
+        $this->response->download('CTI.export.event.'.$e['Event']['id'].'.'.$this->request->params['ext']);
     }
 
     public function xml($key, $eventid=null) {

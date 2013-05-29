@@ -3,14 +3,15 @@
 	<fieldset>
 		<legend><?php echo __('Search Attribute'); ?></legend>
 	<?php
-		echo $this->Form->input('keyword', array('type' => 'textarea', 'label' => 'Containing the following expressions'));
-		echo $this->Form->input('keyword2', array('type' => 'textarea', 'label' => 'Excluding the following events'));
+		echo $this->Form->input('keyword', array('label' => 'Containing the following expressions'));
+		echo $this->Form->input('keyword2', array('label' => 'Excluding the following events'));
 		echo $this->Form->input('org', array('type' => 'text', 'label' => 'From the following organisation'));
 		echo $this->Form->input('type', array('between' => $this->Html->div('forminfo', '', array('id' => 'AttributeTypeDiv'))));
 		echo $this->Form->input('category', array('between' => $this->Html->div('forminfo', '', array('id' => 'AttributeCategoryDiv'))));
 	?>
 	</fieldset>
-<?php echo $this->Form->end(__('Search', true));?>
+<?php echo $this->Form->button(__('Submit'), array('class' => 'btn btn-primary'));
+echo $this->Form->end();?>
 </div>
 <div class="actions">
 	<ul>

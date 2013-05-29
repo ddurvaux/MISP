@@ -7,14 +7,15 @@ class Setting extends SettingsAppModel {
 		'key' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
-			),
+				'required' => true
+			)
 		),
         'value' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
-			),
+				'required' => true
+			)
 		)
 	);
 
 }
-?>

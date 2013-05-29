@@ -67,9 +67,7 @@ class AppController extends Controller {
                 'authError' => 'Unauthorised access.',
                 'loginRedirect' => array('controller' => 'users', 'action' => 'routeafterlogin'),
                 'logoutRedirect' => array('controller' => 'users', 'action' => 'login'),
-                //'authorize' => array('Controller', // Added this line
-                //'Actions' => array('actionPath' => 'controllers')) // TODO ACL, 4: tell actionPath
-                )
+            )
     );
 
     protected $isCTI = false;
@@ -127,6 +125,14 @@ class AppController extends Controller {
             $this->set('isAclAdmin', $role['perm_admin']);
             $this->set('isAclAudit', $role['perm_audit']);
             $this->set('isAclAuth', $role['perm_auth']);
+        }
+    }
+
+    public function beforeRender(){
+        $db = ConnectionManager::getDataSource('default');
+        $test_match = stripos($db->config['database'], 'test');
+        if($test_match !== false){
+            $this->set('test_db', true);
         }
     }
 

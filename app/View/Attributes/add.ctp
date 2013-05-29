@@ -36,7 +36,7 @@ echo $this->Form->input('value', array(
 
 echo $this->Form->input('kill_chain_id', array('default' => 8));
 echo $this->Form->input('blacklist', array('type' => 'checkbox'));
-echo $this->Form->input('malware_research', array('type' => 'checkbox'));
+echo $this->Form->input('malware_eradication', array('type' => 'checkbox'));
 echo $this->Form->input('vuln_manag', array('type' => 'checkbox'));
 
 // link an onchange event to the form elements

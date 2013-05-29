@@ -3,7 +3,7 @@
 if(!empty($me)) { ?>
 <div class="navbar-wrapper">
 
-    <div class="navbar navbar-inverse">
+    <div class="navbar <?php echo empty($test_db) ? 'navbar-inverse' : 'navbar-lab';?>">
         <div class="navbar-inner">
             <div class="nav-collapse collapse">
                 <ul class="nav">

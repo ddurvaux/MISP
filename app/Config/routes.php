@@ -52,7 +52,7 @@
 
     // Activate REST
     Router::mapResources(array('events', 'attributes', 'CIMBLs'));
-    Router::parseExtensions('xml', 'json');
+    Router::parseExtensions('xml', 'json', 'csv');
 
 /**
  * Load all plugin routes.  See the CakePlugin documentation on

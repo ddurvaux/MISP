@@ -13,7 +13,5 @@
 /app/Config/database.php
 /app/Config/core.php
 /cakephp
-*sublime*
-sftp-config.json
 /app/Console/*.py
 /app/Console/*.py[cod]

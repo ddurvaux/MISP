@@ -125,7 +125,7 @@ $mayPublish = ($isAclPublish && $event['Event']['org'] == $me['org']);
                 </dd -->
                 <dt>Info</dt>
                 <dd>
-                    <?php echo nl2br($event['Event']['info']); ?>
+                    <?php echo nl2br(h($event['Event']['info'])); ?>
                     &nbsp;
                 </dd>
             </dl>
@@ -294,12 +294,13 @@ endif; ?>
     <?php
 endif; ?>
     <ul><li><?php echo $this->Html->link(__('Contact reporter', true), array('action' => 'contact', $event['Event']['id'])); ?> </li>
-    <li><?php echo $this->Html->link(__('Download as XML', true), array('action' => 'downloadXML', $event['Event']['id'], 'ext' => 'xml')); ?></li>
+    <li><?php echo $this->Html->link(__('Download as XML', true), array('action' => 'download', $event['Event']['id'], 'ext' => 'xml')); ?></li>
     <li><?php echo $this->Html->link(__('Download as XML (old)', true), array('action' => 'xml', 'download', $event['Event']['id'])); ?></li>
     <li><?php echo $this->Html->link(__('Download as IOC', true), array('action' => 'downloadOpenIOCEvent', $event['Event']['id'])); ?> </li>
     <?php if(!empty($event['Event']['CIMBL_id'])){?>
     <li><?php echo $this->Html->link(__('Download CIMBL XML', true), array('controller' => 'CIMBLs', 'action' => 'download', $event['Event']['CIMBL_id'], 'ext' => 'xml')); ?></li>
     <?php } ?>
+    <li><?php echo $this->Html->link(__('Download CSV', true), array('action' => 'download', $event['Event']['id'], 'ext' => 'csv')); ?></li>
     </ul>
 
     <ul>

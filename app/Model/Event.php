@@ -431,7 +431,7 @@ class Event extends AppModel {
                             array('conditions' => $conditions,
                                 'recursive' => 0,
                                 'order' => 'Event.date DESC',
-                                'fields' => 'Event.*'
+                                /*'fields' => 'Event.*'*/
                                 )
         );
         return $relatedEvents;
@@ -451,7 +451,7 @@ class Event extends AppModel {
             $conditionsCorrelation = array('Correlation.1_event_id' => $this->data['Event']['id']);
         }
         $correlations = $this->Correlation->find('all',array(
-                'fields' => 'Correlation.*',
+                //'fields' => 'Correlation.*',
                 'conditions' => $conditionsCorrelation,
                 'recursive' => 0,
                 'order' => array('Correlation.event_id DESC')));
@@ -811,4 +811,5 @@ class Event extends AppModel {
         // error, so return null
         return null;
     }
+
 }

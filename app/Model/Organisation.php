@@ -7,13 +7,13 @@ App::uses('AppModel', 'Model');
  * @property OrganisationType $OrganisationType
  * @property Country $Country
  */
-class Organisation extends AppModel {
+class Organisation extends AppModel{
 
-/**
- * Display field
- *
- * @var string
- */
+    /**
+    * Display field
+    *
+    * @var string
+    */
     public $displayField = 'name';
 
 /**

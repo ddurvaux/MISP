@@ -21,7 +21,8 @@
         <td><?php echo $cIMBL['TLP']['tlp']; ?></td>
         <td class="actions">
             <!--<?php echo $this->Html->link(__('View'), array('action' => 'view', $cIMBL['CIMBL']['id']), array('class' => 'btn')); ?>-->
-            <?php echo $this->Html->link(__('Download'), array('action' => 'download', $cIMBL['CIMBL']['id'], 'ext' => 'xml'), array('class' => 'btn')); ?>
+            <?php echo $this->Html->link(__('D/L XML'), array('action' => 'download', $cIMBL['CIMBL']['id'], 'ext' => 'xml'), array('class' => 'btn')); ?>
+            <?php echo $this->Html->link(__('D/L CSV'), array('action' => 'download', $cIMBL['CIMBL']['id'], 'ext' => 'csv'), array('class' => 'btn')); ?>
             <?php echo $this->Html->link(__('Edit'), array('action' => 'edit', $cIMBL['CIMBL']['id']), array('class' => 'btn')); ?>
             <?php echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $cIMBL['CIMBL']['id']), array('class' => 'btn'), __('Are you sure you want to delete # %s?', $cIMBL['CIMBL']['id'])); ?>
         </td>

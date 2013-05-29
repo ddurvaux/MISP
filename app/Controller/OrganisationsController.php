@@ -15,6 +15,7 @@ class OrganisationsController extends AppController {
  * @return void
  */
     public function index() {
+
         if(!empty($this->request->data)){
             $redirect = array('action' => 'index');
             foreach($this->request->data['Organisation'] as $k => $v){
@@ -69,10 +70,10 @@ class OrganisationsController extends AppController {
         if ($this->request->is('post')) {
             $this->Organisation->create();
             if ($this->Organisation->save($this->request->data)) {
-                $this->Session->setFlash(__('The organisation has been saved'));
+                $this->Session->setFlash(__('The organisation has been saved'), 'cti_flash', array('type' => 'alert-success'));
                 $this->redirect(array('action' => 'index'));
             } else {
-                $this->Session->setFlash(__('The organisation could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The organisation could not be saved. Please, try again.'), 'cti_flash', array('type' => 'alert-error'));
             }
         }
         $organisationCategories = $this->Organisation->OrganisationCategory->find('list');
@@ -95,10 +96,10 @@ class OrganisationsController extends AppController {
         }
         if ($this->request->is('post') || $this->request->is('put')) {
             if ($this->Organisation->save($this->request->data)) {
-                $this->Session->setFlash(__('The organisation has been saved'));
+                $this->Session->setFlash(__('The organisation has been saved'), 'cti_flash', array('type' => 'alert-success'));
                 $this->redirect(array('action' => 'index'));
             } else {
-                $this->Session->setFlash(__('The organisation could not be saved. Please, try again.'));
+                $this->Session->setFlash(__('The organisation could not be saved. Please, try again.'), 'cti_flash', array('type' => 'alert-error'));
             }
         } else {
             $options = array('conditions' => array('Organisation.' . $this->Organisation->primaryKey => $id));
@@ -125,10 +126,10 @@ class OrganisationsController extends AppController {
         }
         $this->request->onlyAllow('post', 'delete');
         if ($this->Organisation->delete()) {
-            $this->Session->setFlash(__('Organisation deleted'));
+            $this->Session->setFlash(__('Organisation deleted'), 'cti_flash', array('type' => 'alert-success'));
             $this->redirect(array('action' => 'index'));
         }
-        $this->Session->setFlash(__('Organisation was not deleted'));
+        $this->Session->setFlash(__('Organisation was not deleted'), 'cti_flash', array('type' => 'alert-error'));
         $this->redirect(array('action' => 'index'));
     }
 }

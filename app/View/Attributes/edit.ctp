@@ -40,7 +40,7 @@ if ($attachment) {
 
 echo $this->Form->input('kill_chain_id');
 echo $this->Form->input('blacklist', array('type' => 'checkbox'));
-echo $this->Form->input('malware_research', array('type' => 'checkbox'));
+echo $this->Form->input('malware_eradication', array('type' => 'checkbox'));
 echo $this->Form->input('vuln_manag', array('type' => 'checkbox'));
 
 $this->Js->get('#AttributeCategory')->event('change', 'formCategoryChanged("#AttributeCategory")');
