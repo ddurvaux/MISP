@@ -18,7 +18,7 @@ if ('true' == Configure::read('CyDefSIG.sync')) {
 	));
 }
 echo $this->Form->input('to_ids', array(
-			'checked' => true,
+			/*'checked' => true,*/
 			'before' => $this->Html->div('forminfo', isset($attrDescriptions['signature']['formdesc']) ? $attrDescriptions['signature']['formdesc'] : $attrDescriptions['signature']['desc']),
 			'label' => 'IDS Signature?',
 			'div' => 'clear'

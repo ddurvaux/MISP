@@ -38,7 +38,7 @@ class EventsController extends AppController {
     public function beforeFilter() {
         parent::beforeFilter();
 
-        if($this->request->action == 'updateCIMBL'){
+        if(in_array($this->request->action, array('updateCIMBL', 'index'))){
             $this->Security->validatePost = false;
             $this->Security->csrfCheck = false;
         }
@@ -102,11 +102,18 @@ class EventsController extends AppController {
     public function index() {
 
         if(!empty($this->request->data)){
+            if(is_numeric($this->request->data['Event']['key'])){
+                $e = $this->Event->read(array('id'), $this->request->data['Event']['key']);
+                if(!empty($e['Event']['id'])){
+                    $this->redirect(array('action' => 'view', $e['Event']['id']));
+                }
+            }
+
             $redirect = array('action' => 'index');
             foreach($this->request->data['Event'] as $k => $v){
                 if(!empty($v)){
-                    $redirect[$k] = $v
-;                }
+                    $redirect[$k] = $v;
+                }
             }
             $this->redirect($redirect);
         }

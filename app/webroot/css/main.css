@@ -231,3 +231,7 @@ dd {
   text-align: left;
  }
 
+
+.related-column{
+    float:left;
+}

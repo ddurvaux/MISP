@@ -145,8 +145,12 @@ $mayPublish = ($isAclPublish && $event['Event']['org'] == $me['org']);
             <?php if (!empty($relatedEvents)){?>
                 <div class="related">
                     <h3>Related Events</h3>
-                    <ul>
-                    <?php foreach ($relatedEvents as $relatedEvent){ ?>
+                    <ul class="related-column">
+                    <?php
+                    $n = 0;
+                    foreach ($relatedEvents as $relatedEvent){
+                        if($n % 10 == 0 && $n > 1) echo '</ul><ul class="related-column">'
+                        ?>
                     <li><?php
                     $linkText = $relatedEvent['Event']['date'] . ' (' . $relatedEvent['Event']['id'] . ')';
                     echo "<div \" title = \"".$relatedEvent['Event']['info']."\">";
@@ -156,7 +160,9 @@ $mayPublish = ($isAclPublish && $event['Event']['org'] == $me['org']);
                         echo $this->Html->link($linkText, array('controller' => 'events', 'action' => 'view', $relatedEvent['Event']['id']));
                     }
                     ?></li>
-                    <?php } ?>
+                    <?php
+                    $n++;
+                        } ?>
                     </ul>
                 </div>
             <?php } ?>
@@ -170,6 +176,7 @@ $mayPublish = ($isAclPublish && $event['Event']['org'] == $me['org']);
 if (!empty($event['Attribute'])):?>
         <table cellpadding = "0" cellspacing = "0" class="fullwidth">
         <tr>
+            <th>#</th>
             <th>ID</th>
             <th>Category</th>
             <th>Kill Chain</th>
@@ -184,11 +191,15 @@ if (!empty($event['Attribute'])):?>
             <?php
     endif;?>
         </tr><?php
+    $i = 1;
     foreach ($categories as $category):
         $first = 1;
+
         foreach ($event['Attribute'] as $attribute):
+
             if ($attribute['category'] != $category) continue;?>
             <tr>
+                <td><?php echo $i++;?></td>
                 <td><?php echo $attribute['id']?></td>
                 <td class="short" title="<?php if('' != $attribute['category']) echo $categoryDefinitions[$attribute['category']]['desc'];?>"><?php
             if ($first) {
