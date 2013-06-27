@@ -76,8 +76,14 @@ foreach ($attributes as $attribute):
 		echo $sigDisplay;
 	}
 	?>&nbsp;</td>
-		<td class="short" style="text-align: center;" onclick="document.location ='<?php echo $this->Html->url(array('controller' => 'events', 'action' => 'view', $attribute['Attribute']['event_id']), true);?>';">
-		<?php echo $attribute['Attribute']['to_ids'] ? 'Yes' : 'No'; ?>&nbsp;</td>
+		<td>
+		<input class="checkbox" type="checkbox" <?php echo $attribute['Attribute']['to_ids'] == 1 ? 'checked' : '';?>
+                          name='attr'
+                          id="attr_<?php echo $attribute['Attribute']['id'];?>"
+                          value="<?php echo $attribute['Attribute']['id'];?>">
+		<label for="attr_<?php echo $attribute['Attribute']['id'];?>"></label>
+
+		&nbsp;</td>
 		<td class="actions"><?php
 	if ($isAdmin || ($isAclModify && $attribute['Event']['user_id'] == $me['id']) || ($isAclModifyOrg && $attribute['Event']['org'] == $me['org'])) {
 		echo $this->Html->link(__('Edit'), array('action' => 'edit', $attribute['Attribute']['id']), array('class' => 'btn'));

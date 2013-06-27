@@ -32,7 +32,7 @@ echo $this->Form->input('reporter_organisation_id', array(
     'default' => 512,
     'label' => __('Reporter'))
 );
-echo $this->Form->input('report_channel_id', array('options' => $channels));
+echo $this->Form->input('reporter_channel_id', array('options' => $channels));
 
 
 

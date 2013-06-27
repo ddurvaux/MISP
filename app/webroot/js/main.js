@@ -23,4 +23,22 @@
         });
     });
 
+    $("#container").on('change', '.checkbox', function(){
+        var Attribute = {
+            id: $(this).val(),
+            to_ids: $(this).is(":checked") || false
+        };
+        $.ajax({
+            url: '/attributes/toggle',
+            type: 'POST',
+            data: {
+                Attribute: Attribute
+            },
+            dataType: 'json',
+            success: function(data){
+                console.log(data);
+            }
+        });
+    });
+
 }());

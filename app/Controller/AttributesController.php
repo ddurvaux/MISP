@@ -21,7 +21,8 @@ class AttributesController extends AppController {
 
     public function beforeFilter() {
         parent::beforeFilter();
-        if($this->request->action == 'search'){
+        //if($this->request->action == 'search'){
+        if(in_array($this->request->action, array('search', 'toggle'))){
             $this->Security->validatePost = false;
             $this->Security->csrfCheck = false;
         }
@@ -538,7 +539,7 @@ class AttributesController extends AppController {
                     $this->request->data['Attribute']['dist_change'] = 1 + $existingAttribute['Attribute']['dist_change'];
                 }
             }
-            //die(debug($this->request->data));
+
             if ($this->Attribute->save($this->request->data)) {
                 $this->Session->setFlash(('The attribute has been saved.'), 'default', array('class' => 'alert alert-success'));
                 // remove the published flag from the event
@@ -683,7 +684,8 @@ class AttributesController extends AppController {
     }
 
     public function search() {
-        $fullAddress = '/attributes/search';
+        //die(debug($this->request->webroot));
+        $fullAddress = $this->request->webroot.'attributes/search';
 
         if ($this->request->here == $fullAddress) {
 
@@ -882,5 +884,18 @@ class AttributesController extends AppController {
         if (!self::_isAdmin()) throw new NotFoundException();
 
         $this->set('fails', $this->Attribute->checkComposites());
+    }
+
+    public function toggle(){
+        $return = array();
+        if($this->request->is('post')){
+            if(!$this->Attribute->updateAll(
+                array('Attribute.to_ids' => $this->request->data['Attribute']['to_ids']),
+                array('Attribute.id' => $this->request->data['Attribute']['id'])
+            )){
+                $return = array('msg' => 'Could not toggle attribute signature');
+            }
+            return new CakeResponse(array('body' => json_encode($return)));
+        }
     }
 }

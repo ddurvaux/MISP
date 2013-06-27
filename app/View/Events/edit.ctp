@@ -29,7 +29,7 @@ echo $this->Form->input('end_time', array(
 ));
 
 echo $this->Form->input('reporter_organisation_id', array('options' => $organisations, 'label' => __('Reporter')));
-echo $this->Form->input('report_channel_id', array('options' => $channels));
+echo $this->Form->input('reporter_channel_id', array('options' => $channels));
 
 
 //echo $this->Form->input('CIMBL_id', array('empty' => __('None')));
