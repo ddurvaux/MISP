@@ -19,6 +19,7 @@ class User extends AppModel {
 
 	public $orgField = 'org';	// TODO Audit, LogableBehaviour + org
 
+	
 /**
  * Validation rules
  *
@@ -44,22 +45,22 @@ class User extends AppModel {
 				//'last' => false, // Stop validation after this rule
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
-			'complexity' => array(
-				'rule' => array('complexPassword'),
-				'message' => 'The password must contain at least one upper-case, one lower-case, one (digits or special character).',
+			//'complexity' => array(
+			//	'rule' => array('complexPassword'),
+			//	'message' => 'The password must contain at least one upper-case, one lower-case, one (digits or special character).',
 				//'allowEmpty' => false,
 				//'required' => true,
 				//'last' => false, // Stop validation after this rule
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
-			'identical' => array(
-				'rule' => array('identicalFieldValues', 'confirm_password'),
-				'message' => 'Please re-enter your password twice so that the values match.',
+			//),
+			//'identical' => array(
+			//	'rule' => array('identicalFieldValues', 'confirm_password'),
+			//	'message' => 'Please re-enter your password twice so that the values match.',
 				//'allowEmpty' => false,
 				//'required' => true,
 				//'last' => false, // Stop validation after this rule
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
+			//),
 		),
 		'org' => array(
 			'notempty' => array(
@@ -74,7 +75,7 @@ class User extends AppModel {
 		'org_id' => array(
 			'notempty' => array(
 				'rule' => array('notempty'),
-				'message' => 'Please specify the organisation ID where you are working.',	// TODO ACL, org_id in Users
+				'message' => 'Please specify the organisation ID where you are working.',
 				//'allowEmpty' => false,
 				//'required' => false,
 				//'last' => false, // Stop validation after this rule
@@ -82,14 +83,14 @@ class User extends AppModel {
 			),
 		),
 		'email' => array(
-			'email' => array(
-				'rule' => array('email'),
-				'message' => 'Please enter a valid email address.',
-				//'allowEmpty' => false,
-				'required' => true,
+			//'email' => array(
+			//	'rule' => array('email'),
+			//	'message' => 'Please enter a valid email address.',
+			//	//'allowEmpty' => false,
+			//	'required' => true,
 				//'last' => false, // Stop validation after this rule
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
-			),
+			//),
 			'unique' => array(
 				'rule' => 'isUnique',
 				'message' => 'An account with this email address already exists.'
@@ -230,51 +231,18 @@ class User extends AppModel {
 		)
 	);
 
-/**
- * TODO ACL: 1: be requester to CakePHP ACL system
- */
 	public $actsAs = array(
-		'Acl' => array(	// TODO ACL, + 'enabled' => false
-			'type' => 'requester',
-			'enabled' => false
-		),
 		'SysLogLogable.SysLogLogable' => array(	// TODO Audit, logable
 			'userModel' => 'User',
 			'userKey' => 'user_id',
 			'change' => 'full'
 		),
 		'Trim',
+		'Containable'
 		//'RemoveNewline' => array('fields' => array('gpgkey')),
 	);
 
-/**
- * TODO ACL: 2: hook User into CakePHP ACL system (so link to aros)
- */
-	public function parentNode() {
-		if (!$this->id && empty($this->data)) {
-			return null;
-		}
-		if (isset($this->data['User']['role_id'])) {
-			$roleId = $this->data['User']['role_id'];
-		} else {
-			$roleId = $this->field('role_id');
-		}
-		if (!$roleId) {
-			return null;
-		} else {
-			return array('Role' => array('id' => $roleId));
-		}
-	}
-
-/**
- * TODO ACL: 3: rights on Roles: http://stackoverflow.com/questions/6154285/aros-table-in-cakephp-is-still-including-users-even-after-bindnode
- */
-	public function bindNode($user) {
-		// return array('model' => 'Group', 'foreign_key' => $user['User']['role_id']);
-		return array('Role' => array('id' => $user['User']['role_id']));
-	}
-
-	public function beforeSave() {
+	public function beforeSave($options = array()) {
 		if (isset($this->data[$this->alias]['password'])) {
 			$this->data[$this->alias]['password'] = AuthComponent::password($this->data[$this->alias]['password']);
 		}
@@ -312,10 +280,12 @@ class User extends AppModel {
 				}
 			} catch (Exception $e) {
 				//debug($e);
+				$this->log($e->getMessage());
 				return false;
 			}
 		} catch (Exception $e) {
 			//debug($e);
+			$this->log($e->getMessage());
 			return true; // TODO was false
 		}
 	}
@@ -350,7 +320,6 @@ class User extends AppModel {
  * Generates an authentication key for each user
  */
 	public function generateAuthKey() {
-		//$key = sha1(mt_rand(30, 30).time());
 		$length = 40;
 		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 		$charLen = strlen($characters) - 1;
@@ -358,9 +327,20 @@ class User extends AppModel {
 		for ($p = 0; $p < $length; $p++) {
 			$key .= $characters[rand(0, $charLen)];
 		}
-
 		return $key;
 	}
+
+	public function generateRandomPassword() {
+	    $length = 12;
+		$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ-+=!@#$%&*()<>/?';
+		$charLen = strlen($characters) - 1;
+		$key = '';
+		for ($p = 0; $p < $length; $p++) {
+			$key .= $characters[rand(0, $charLen)];
+		}
+		return $key;
+	}
+
 
 	public function checkAndCorrectPgps() {
 		$fails = array();
