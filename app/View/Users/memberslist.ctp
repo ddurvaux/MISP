@@ -1,6 +1,6 @@
 <div class="users index">
 	<h2>Members</h2>
- 	<table cellpadding="0" cellspacing="0" style="width:300px;">
+ 	<table class="table table-striped table-condensed table-bordered" style="width:300px;">
 	<tr>
 			<th>Organisation</th>
 			<th># of members</th>
@@ -9,13 +9,13 @@
 	<?php
 foreach ($orgs as $org):?>
 	<tr>
-		<td><?php echo $org['User']['org']; ?>&nbsp;</td>
-		<td><?php echo $org[0]['num_members']; ?>&nbsp;</td>
+		<td><?php echo h($org['User']['org']); ?>&nbsp;</td>
+		<td><?php echo h($org[0]['num_members']); ?>&nbsp;</td>
 		<?php
 			$imgRelativePath = 'orgs' . DS . h($org['User']['org']) . '.png';
 			$imgAbsolutePath = APP . WEBROOT_DIR . DS . 'img' . DS . $imgRelativePath;
 		?>
-		<td><?php if (file_exists($imgAbsolutePath)) echo $this->Html->image('orgs/' . h($org['User']['org']) . '.png', array('alt' => h($org['User']['org']),'width' => '48','hight' => '48'));?>&nbsp</td>
+		<td><?php if (file_exists($imgAbsolutePath)) echo $this->Html->image('orgs/' . h($org['User']['org']) . '.png', array('alt' => h($org['User']['org']),'width' => '48','hight' => '48'));?>&nbsp;</td>
 	</tr>
 	<?php
 endforeach; ?>
@@ -39,7 +39,7 @@ foreach ($graphData as $row) {
 		});
 		var panel1 = Ext.create('widget.panel', {
 			width: 800,
-			height: 900,
+			height: 1150,
 			//title: 'Attributes by Organisation',
 			renderTo: 'graph',
 			layout: 'fit',
@@ -90,7 +90,7 @@ foreach ($graphData as $row) {
 	});
 	</script>
 
-	<!-- table cellpadding="0" cellspacing="0" style="width:400px;">
+	<!-- table class="table table-striped table-condensed table-bordered" style="width:400px;">
 	<tr>
 		<th>Org</th>
 		<th>Type</th>
@@ -99,9 +99,9 @@ foreach ($graphData as $row) {
 	<?php
 foreach ($typesHistogram as $item):?>
 		<tr>
-			<td><?php echo $item['Event']['org']; ?>&nbsp;</td>
-			<td><?php echo $item['Attribute']['type']; ?>&nbsp;</td>
-			<td><?php echo $item['0']['num_types']; ?>&nbsp;</td>
+			<td><?php echo h($item['Event']['org']); ?>&nbsp;</td>
+			<td><?php echo h($item['Attribute']['type']); ?>&nbsp;</td>
+			<td><?php echo h($item['0']['num_types']); ?>&nbsp;</td>
 
 		</tr>
 		<?php
@@ -109,13 +109,6 @@ endforeach; ?>
 	</table -->
 
 </div>
-
-<div class="actions">
-	<ul>
-		<?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>
-
-<div class="users index">
-
-</div>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'globalActions', 'menuItem' => 'members'));
+?>

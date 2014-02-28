@@ -1,35 +1,75 @@
 <div class="servers form">
-<?php echo $this->Form->create('Server');?>
+<?php echo $this->Form->create('Server', array('type' => 'file', 'novalidate'=>true));?>
 	<fieldset>
-		<legend><?php echo __('Edit Server'); ?></legend>
+		<legend>Add Server</legend>
 	<?php
-		echo $this->Form->input('id');
 		echo $this->Form->input('url', array(
-					'label' => 'Base URL',
-					'before' => $this->Html->div('forminfo', 'The base-url to the external server you want to sync with.<br/>Example: <i>https://foo.sig.mil.be</i>'),
+				'label' => 'Base URL',
 			));
+		
 		echo $this->Form->input('organization', array(
-					'label' => 'Organization',
-					'before' => $this->Html->div('forminfo', 'The organization having the external server you want to sync with.<br/>Example: <i>https://foo.sig.mil.be</i>'),
+				'label' => 'Organization',
 			));
+
 		echo $this->Form->input('authkey', array(
-					'before' => $this->Html->div('forminfo', 'You can find the authentication key on your profile on the external server.<br/><i>Leave empty if you don\'t want to change it</i>.'),
 			));
+	?>
+		<div class = "input clear"></div>
+	<?php
 		echo $this->Form->input('push', array(
-					'before' => $this->Html->div('forminfo', 'Allow the <em>upload</em> of events and their attributes.'),
 			));
+
 		echo $this->Form->input('pull', array(
-					'before' => $this->Html->div('forminfo', 'Allow the <em>download</em> of events and their attributes from the server.'),
+			));
+	?>
+		<div class = "input clear"></div>
+	<?php
+		echo $this->Form->input('self_signed', array(
+				'type' => 'checkbox',
+			));
+
+		echo $this->Form->input('Server.submitted_cert', array(
+				'label' => '<b>Certificate file</b>',
+				'type' => 'file',
+				'div' => 'clear'
 			));
 	?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+<?php
+echo $this->Form->button('Edit', array('class' => 'btn btn-primary'));
+echo $this->Form->end();
+$id = $this->Form->value('Server.id');
+?>
 </div>
-<div class="actions">
-	<ul>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'sync', 'menuItem' => 'edit'));
+?>
 
-		<li><?php echo $this->Form->postLink(__('Delete'), array('action' => 'delete', $this->Form->value('Server.id')), null, __('Are you sure you want to delete # %s?', $this->Form->value('Server.id'))); ?></li>
-		<li>&nbsp;</li>
-		<?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>
+
+<script type="text/javascript">
+//
+var formInfoValues = {
+		'ServerUrl' : "The base-url to the external server you want to sync with. Example: https://foo.sig.mil.be",
+		'ServerOrganization' : "The organization having the external server you want to sync with. Example: BE",
+		'ServerAuthkey' : "You can find the authentication key on your profile on the external server.",
+		'ServerPush' : "Allow the upload of events and their attributes.",
+		'ServerPull' : "Allow the download of events and their attributes from the server.",
+};
+
+$(document).ready(function() {
+
+	$("#ServerUrl, #ServerOrganization, #ServerAuthkey, #ServerPush, #ServerPull").on('mouseleave', function(e) {
+	    $('#'+e.currentTarget.id).popover('destroy');
+	});
+
+	$("#ServerUrl, #ServerOrganization, #ServerAuthkey, #ServerPush, #ServerPull").on('mouseover', function(e) {
+	    var $e = $(e.target);
+	        $('#'+e.currentTarget.id).popover('destroy');
+	        $('#'+e.currentTarget.id).popover({
+	            trigger: 'focus',
+	            placement: 'right',
+	            content: formInfoValues[e.currentTarget.id],
+	        }).popover('show');
+	});
+});
+</script>

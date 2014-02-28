@@ -11,7 +11,7 @@ App::uses('Xml', 'Utility');
  */
 class ServersController extends AppController {
 
-	public $components = array('Acl' ,'Security' ,'RequestHandler');	// XXX ACL component
+	public $components = array('Security' ,'RequestHandler');	// XXX ACL component
 
 	public $paginate = array(
 			'limit' => 60,
@@ -27,7 +27,7 @@ class ServersController extends AppController {
 		parent::beforeFilter();
 
 		// Disable this feature if the sync configuration option is not active
-		if ('true' != Configure::read('CyDefSIG.sync'))
+		if ('true' != Configure::read('MISP.sync'))
 			throw new ConfigureException("The sync feature is not active in the configuration.");
 
 		// permit reuse of CSRF tokens on some pages.
@@ -38,20 +38,6 @@ class ServersController extends AppController {
 		}
 	}
 
-	public function isAuthorized($user) {
-		// Admins can access everything
-		if (parent::isAuthorized($user)) {
-			return true;
-		}
-		// Only on own servers for these actions
-		if (in_array($this->action, array('edit', 'delete', 'pull'))) {
-			$serverid = $this->request->params['pass'][0];
-			return $this->Server->isOwnedByOrg($serverid, $this->Auth->user('org'));
-		}
-		// the other pages are allowed by logged in users
-		return true;
-	}
-
 /**
  * index method
  *
@@ -59,18 +45,18 @@ class ServersController extends AppController {
  */
 	public function index() {
 		$this->Server->recursive = 0;
-		if ($this->_IsSiteAdmin()) {
+		if ($this->_isSiteAdmin()) {
 			$this->paginate = array(
 							'conditions' => array(),
 			);
 		} else {
-			if (!$this->checkAction('perm_sync')) $this->redirect(array('controller' => 'events', 'action' => 'index'));
+			if (!$this->userRole['perm_sync'] && !$this->userRole['perm_admin']) $this->redirect(array('controller' => 'events', 'action' => 'index'));
 			$conditions['Server.org LIKE'] = $this->Auth->user('org');
 			$this->paginate = array(
 					'conditions' => array($conditions),
 			);
 		}
-		$this->set('servers', Sanitize::clean($this->paginate()));
+		$this->set('servers', $this->paginate());
 	}
 
 /**
@@ -79,13 +65,14 @@ class ServersController extends AppController {
  * @return void
  */
 	public function add() {
-		if ((!$this->_IsSiteAdmin()) && !($this->Server->organization == $this->Auth->user('org') && $this->checkAction('perm_sync'))) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
+		if (!$this->_isAdmin()) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		if ($this->request->is('post')) {
 			// force check userid and orgname to be from yourself
 			$this->request->data['Server']['org'] = $this->Auth->user('org');
-
-			$this->Server->create();
 			if ($this->Server->save($this->request->data)) {
+				if (isset($this->request->data['Server']['submitted_cert'])) {
+					$this->__saveCert($this->request->data, $this->Server->id);
+				}
 				$this->Session->setFlash(__('The server has been saved'));
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -102,20 +89,23 @@ class ServersController extends AppController {
  * @throws NotFoundException
  */
 	public function edit($id = null) {
-		if (!$this->_IsSiteAdmin() && !($this->Server->organization == $this->Auth->user('org') && $this->checkAction('perm_sync'))) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		$this->Server->id = $id;
 		if (!$this->Server->exists()) {
 			throw new NotFoundException(__('Invalid server'));
 		}
-		// only edit own servers verified by isAuthorized
-
+		$s = $this->Server->read(null, $id);
+		if (!$this->_isSiteAdmin() && !($s['Server']['org'] == $this->Auth->user('org') && $this->_isAdmin())) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		if ($this->request->is('post') || $this->request->is('put')) {
 			// say what fields are to be updated
-			$fieldList = array('url', 'push', 'pull', 'organization');
+			$fieldList = array('id', 'url', 'push', 'pull', 'organization', 'self_signed', 'cert_file');
+			$this->request->data['Server']['id'] = $id;
 			if ("" != $this->request->data['Server']['authkey'])
 				$fieldList[] = 'authkey';
 			// Save the data
 			if ($this->Server->save($this->request->data, true, $fieldList)) {
+				if (isset($this->request->data['Server']['submitted_cert']) && $this->request->data['Server']['submitted_cert']['size'] != 0) {
+					$this->__saveCert($this->request->data, $this->Server->id);
+				}
 				$this->Session->setFlash(__('The server has been saved'));
 				$this->redirect(array('action' => 'index'));
 			} else {
@@ -124,7 +114,7 @@ class ServersController extends AppController {
 		} else {
 			$this->Server->read(null, $id);
 			$this->Server->set('authkey', '');
-			$this->request->data = Sanitize::clean($this->Server->data);
+			$this->request->data = $this->Server->data;
 		}
 	}
 
@@ -137,7 +127,6 @@ class ServersController extends AppController {
  * @throws NotFoundException
  */
 	public function delete($id = null) {
-		if(!$this->_IsSiteAdmin() && !($this->Server->id == $this->Auth->user('org') && $this->checkAction('perm_sync'))) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		if (!$this->request->is('post')) {
 			throw new MethodNotAllowedException();
 		}
@@ -145,6 +134,8 @@ class ServersController extends AppController {
 		if (!$this->Server->exists()) {
 			throw new NotFoundException(__('Invalid server'));
 		}
+		$s = $this->Server->read(null, $id);
+		if (!$this->_isSiteAdmin() && !($s['Server']['org'] == $this->Auth->user('org') && $this->_isAdmin())) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		if ($this->Server->delete()) {
 			$this->Session->setFlash(__('Server deleted'));
 			$this->redirect(array('action' => 'index'));
@@ -153,217 +144,146 @@ class ServersController extends AppController {
 		$this->redirect(array('action' => 'index'));
 	}
 
-	public function pull($id = null, $full=false) {
-		// TODO should we de-activate data validation for type and category / and or mapping? Maybe other instances have other configurations that are incompatible.
-		if (!$this->_IsSiteAdmin() && !($this->Server->organization == $this->Auth->user('org') && $this->checkAction('perm_sync'))) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
-		if (!$this->request->is('post')) {
-			throw new MethodNotAllowedException();
+	/**
+	 * Pull one or more events with attributes from a remote instance.
+	 * Set $technique to
+	 * 		full - download everything
+	 * 		incremental - only new events
+	 * 		<int>	- specific id of the event to pull
+	 * For example to download event 10 from server 2 to /servers/pull/2/5
+	 * @param int $id The id of the server
+	 * @param unknown_type $technique
+	 * @throws MethodNotAllowedException
+	 * @throws NotFoundException
+	 */
+	public function pull($id = null, $technique=false) {
+		$this->Server->id = $id;
+		if (!$this->Server->exists()) {
+			throw new NotFoundException(__('Invalid server'));
 		}
+		$s = $this->Server->read(null, $id);
+		if (!$this->_isSiteAdmin() && !($s['Server']['org'] == $this->Auth->user('org') && $this->_isAdmin())) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
 		$this->Server->id = $id;
 		if (!$this->Server->exists()) {
 			throw new NotFoundException(__('Invalid server'));
 		}
 
-		App::uses('HttpSocket', 'Network/Http');
-		$this->Server->read(null, $id);
 		if (false == $this->Server->data['Server']['pull']) {
 			$this->Session->setFlash(__('Pull setting not enabled for this server.'));
 			$this->redirect(array('action' => 'index'));
 		}
-
-		if ("full" == $full) {
-			// get a list of the event_ids on the server
-			$eventIds = $this->Event->getEventIdsFromServer($this->Server->data);
-			if ($eventIds === 403) {
-				$this->Session->setFlash(__('Not authorised. This is either due to an invalid auth key, or due to the sync user not having authentication permissions enabled on the remote server.'));
-				$this->redirect(array('action' => 'index'));
-			}
-			$successes = array();
-			$fails = array();
-			// download each event
-			if (null != $eventIds) {
-				App::import('Controller', 'Events');
-				$HttpSocket = new HttpSocket();
-				foreach ($eventIds as &$eventId) {
-					$event = $this->Event->downloadEventFromServer(
-							$eventId,
-							$this->Server->data);
-					if (null != $event) {
-						// we have an Event array
-						if (!isset($event['Event']['distribution'])) { // version 1
-							$event['Event']['distribution'] = 'This Community-only';
-						}
-						// up the hop count
-						$event['Event']['hop_count']++;
-						// Distribution
-						switch($event['Event']['distribution']) {
-							case 'Your organization only': // Distribution, no Org only in Event
-							case 'This server-only':
-								continue 2; // to the next iteration of the outer loop
-								break;
-							case 'This Community-only': // Distribution, correct Community to Org only in Event
-								$event['Event']['distribution'] = 'Your organization only';
-								break;
-							case 'Connected communities': // Distribution, correct All to Community in Event
-								$event['Event']['distribution'] = 'This Community-only';
-								break;
-						}
-
-						// correct $event if just one Attribute
-						if (is_array($event['Event']['Attribute']) && isset($event['Event']['Attribute']['id'])) {
-							$tmp = $event['Event']['Attribute'];
-							unset($event['Event']['Attribute']);
-							$event['Event']['Attribute'][0] = $tmp;
-						}
-
-						if (is_array($event['Event']['Attribute'])) {
-							$toRemove = array();
-							$size = is_array($event['Event']['Attribute']) ? count($event['Event']['Attribute']) : 0;
-							for ($i = 0; $i < $size; $i++) {
-								if (!isset($event['Event']['Attribute'][$i]['distribution'])) { // version 1
-									$event['Event']['Attribute'][$i]['distribution'] = 'This Community-only';
-								}
-								switch($event['Event']['Attribute'][$i]['distribution']) {
-									case 'Your organization only':
-									case 'This server-only':
-										$toRemove[] = $i;
-										break;
-									case 'This Community-only':
-										$event['Event']['Attribute'][$i]['private'] = true;
-										$event['Event']['Attribute'][$i]['cluster'] = false;
-										$event['Event']['Attribute'][$i]['communitie'] = false;
-										$event['Event']['Attribute'][$i]['distribution'] = 'Your organization only';
-										break;
-									case 'Connected communities':
-										$event['Event']['Attribute'][$i]['cluster'] = true;
-										$event['Event']['Attribute'][$i]['distribution'] = 'This Community-only';
-										break;
-								}
-							}
-							foreach ($toRemove as $thisRemove) {
-								unset($event['Event']['Attribute'][$thisRemove]);
-							}
-							$event['Event']['Attribute'] = array_values($event['Event']['Attribute']);
-						} else {
-							unset($event['Event']['Attribute']);
-						}
-						// Distribution, set reporter of the event, being the admin that initiated the pull
-						$event['Event']['user_id'] = $this->Auth->user('id');
-						// check if the event already exist (using the uuid)
-						$existingEventCount = $this->Event->find('count', array('conditions' => array('Event.uuid' => $event['Event']['uuid'])));
-						if ($existingEventCount == 0) {
-							// add data for newly imported events
-							$event['Event']['info'] .= "\n Imported from " . $this->Server->data['Server']['url'];
-						}
-						$eventsController = new EventsController();
-						$eventsController->constructClasses();
-						$passAlong = $this->Server->data['Server']['url'];
-						try {
-							$result = $eventsController->_add($event, $this->Auth, $fromXml = true, $this->Server->data['Server']['organization'], $passAlong, true);
-						} catch (MethodNotAllowedException $e) {
-							if ($e->getMessage() == 'Event already exists') {
-								//$successes[] = $eventId;	// commented given it's in a catch..
-								continue;
-							}
-						}
-						$successes[] = $eventId;			// ..moved, so $successes does keep administration.
-						//$result = $this->_importEvent($event);
-						// TODO error handling
-					} else {
-						// error
-						$fails[$eventId] = 'failed';
-					}
-
+		if (!Configure::read('MISP.background_jobs')) {
+			$result = $this->Server->pull($this->Auth->user(), $id, $technique, $s);
+			
+			// error codes
+			if (is_numeric($result)) {
+				switch ($result) {
+					case '1' :
+						$this->Session->setFlash(__('Not authorised. This is either due to an invalid auth key, or due to the sync user not having authentication permissions enabled on the remote server.'));
+						$this->redirect(array('action' => 'index'));
+						break;
+					case '2' :
+						$this->Session->setFlash($eventIds);
+						$this->redirect(array('action' => 'index'));
+						break;
+					case '3' :
+						throw new NotFoundException('Sorry, this is not yet implemented');
+						break;
+					case '4' :
+						$this->redirect(array('action' => 'index'));
+						break;
+						
 				}
-				if (count($fails) > 0) {
-					// there are fails, take the lowest fail
-					$lastpulledid = min(array_keys($fails));
-				} else {
-					// no fails, take the highest success
-					$lastpulledid = count($successes) > 0 ? max($successes) : 0;
-				}
-				// increment lastid based on the highest ID seen
-				$this->Server->saveField('lastpulledid', $lastpulledid);
-
+			} else {
+				$this->set('successes', $result[0]);
+				$this->set('fails', $result[1]);
+				$this->set('pulledProposals', $result[2]);
+				$this->set('lastpulledid', $result[3]);
 			}
-
 		} else {
-			// TODO incremental pull
-			// lastpulledid
-			throw new NotFoundException('Sorry, this is not yet implemented');
-
-			// increment lastid based on the highest ID seen
+			$this->loadModel('Job');
+			$this->Job->create();
+			$data = array(
+					'worker' => 'default',
+					'job_type' => 'pull',
+					'job_input' => 'Server: ' . $id,
+					'status' => 0,
+					'retries' => 0,
+					'org' => $this->Auth->user('org'),
+					'message' => 'Pulling.',
+			);
+			$this->Job->save($data);
+			$jobId = $this->Job->id;
+			$process_id = CakeResque::enqueue(
+					'default',
+					'ServerShell',
+					array('pull', $this->Auth->user('id'), $id, $technique, $jobId)
+			);
+			$this->Job->saveField('process_id', $process_id);
+			$this->Session->setFlash('Pull queued for background execution.');
+			$this->redirect(array('action' => 'index'));
 		}
-
-		$this->set('successes', $successes);
-		$this->set('fails', $fails);
 	}
 
-	public function push($id = null, $full=false) {
-		if ($this->Auth->user('org') != 'ADMIN' && !($this->Server->organization == $this->Auth->user('org') && $this->checkAction('perm_sync'))) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
-		if (!$this->request->is('post')) {
-			throw new MethodNotAllowedException();
-		}
+	public function push($id = null, $technique=false) {
 		$this->Server->id = $id;
 		if (!$this->Server->exists()) {
 			throw new NotFoundException(__('Invalid server'));
 		}
-
-		App::uses('HttpSocket', 'Network/Http');
-		$this->Server->read(null, $id);
-
-		if (false == $this->Server->data['Server']['push']) {
-			$this->Session->setFlash(__('Push setting not enabled for this server.'));
+		$s = $this->Server->read(null, $id);
+		if (!$this->_isSiteAdmin() && !($s['Server']['org'] == $this->Auth->user('org') && $this->_isAdmin())) $this->redirect(array('controller' => 'servers', 'action' => 'index'));
+		if (!Configure::read('MISP.background_jobs')) {
+			$server = $this->Server->read(null, $id);
+			App::uses('SyncTool', 'Tools');
+			$syncTool = new SyncTool();
+			$HttpSocket = $syncTool->setupHttpSocket($server);
+			$result = $this->Server->push($id, $technique, false, $HttpSocket);
+			$this->set('successes', $result[0]);
+			$this->set('fails', $result[1]);
+		} else {
+			$this->loadModel('Job');
+			$this->Job->create();
+			$data = array(
+					'worker' => 'default',
+					'job_type' => 'push',
+					'job_input' => 'Server: ' . $id,
+					'status' => 0,
+					'retries' => 0,
+					'org' => $this->Auth->user('org'),
+					'message' => 'Pushing.',
+			);
+			$this->Job->save($data);
+			$jobId = $this->Job->id;
+			$process_id = CakeResque::enqueue(
+					'default',
+					'ServerShell',
+					array('push', $id, $technique, $jobId)
+			);
+			$this->Job->saveField('process_id', $process_id);
+			$this->Session->setFlash('Push queued for background execution.');
 			$this->redirect(array('action' => 'index'));
 		}
-
-		if ("full" == $full) $lastpushedid = 0;
-		else $lastpushedid = $this->Server->data['Server']['lastpushedid'];
-
-		$findParams = array(
-				'conditions' => array(
-						'Event.id >' => $lastpushedid, // TODO think about this one!!
-						'Event.private' => 0,
-						'Event.published' => 1
-						), //array of conditions
-				'recursive' => 1, //int
-				'fields' => array('Event.*'), //array of field names
-		);
-		$events = $this->Event->find('all', $findParams);
-
-		// FIXME now all events are uploaded, even if they exist on the remote server. No merging is done
-
-		$successes = array();
-		$fails = array();
-		$lowestfailedid = null;
-
-		if (!empty($events)) { // do nothing if there are no events to push
-			$HttpSocket = new HttpSocket();
-
-			$this->loadModel('Attribute');
-			// upload each event separately and keep the results in the $successes and $fails arrays
-			foreach ($events as &$event) {
-				$result = $this->Event->uploadEventToServer(
-						$event,
-						$this->Server->data,
-						$HttpSocket);
-				if (true == $result) {
-					$successes[] = $event['Event']['id'];
-				} else {
-					$fails[$event['Event']['id']] = $result;
-				}
-			}
-			if (count($fails) > 0) {
-				// there are fails, take the lowest fail
-				$lastpushedid = min(array_keys($fails));
-			} else {
-				// no fails, take the highest success
-				$lastpushedid = max($successes);
-			}
-			// increment lastid based on the highest ID seen
-			$this->Server->saveField('lastpushedid', $lastpushedid);
+	}
+	
+	public function __saveCert($server, $id) {
+		$ext = '';
+		App::uses('File', 'Utility');
+		App::uses('Folder', 'Utility');
+		$file = new File($server['Server']['submitted_cert']['name']);
+		$ext = $file->ext();
+		if (($ext != 'pem') || !$server['Server']['submitted_cert']['size'] > 0) {
+			$this->Session->setFlash('Incorrect extension of empty file.');
+			$this->redirect(array('action' => 'index'));
 		}
-		$this->set('successes', $successes);
-		$this->set('fails', $fails);
+		$pemData = fread(fopen($server['Server']['submitted_cert']['tmp_name'], "r"),
+				$server['Server']['submitted_cert']['size']);
+		$destpath = APP . "files" . DS . "certs" . DS;
+		$dir = new Folder(APP . "files" . DS . "certs", true);
+		if (!preg_match('@^[\w-,\s,\.]+\.[A-Za-z0-9_]{2,4}$@', $server['Server']['submitted_cert']['name'])) throw new Exception ('Filename not allowed');
+		$pemfile = new File ($destpath . $id . '.' . $ext);
+		$result = $pemfile->write($pemData); 
+		$s = $this->Server->read(null, $id);
+		$s['Server']['cert_file'] = $s['Server']['id'] . '.' . $ext;
+		if ($result) $this->Server->save($s);
 	}
 }

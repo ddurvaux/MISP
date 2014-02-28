@@ -8,7 +8,7 @@
 		</dd>
 		<dt><?php echo __('Name'); ?></dt>
 		<dd>
-			<?php echo $role['Role']['name']; ?>
+			<?php echo h($role['Role']['name']); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Add'); ?></dt>
@@ -26,20 +26,28 @@
 			<?php echo h($role['Role']['perm_publish']); ?>
 			&nbsp;
 		</dd>
-		<dt><?php echo __('Full'); ?></dt>
-		<dd>
-			<?php echo h($role['Role']['perm_full']); ?>
-			&nbsp;
-		</dd>
 		<dt><?php echo __('Auth'); ?></dt>
 		<dd>
 			<?php echo h($role['Role']['perm_auth']); ?>
 			&nbsp;
 		</dd>
+		<dt><?php echo __('Regexp'); ?></dt>
+		<dd>
+			<?php echo h($role['Role']['perm_regexp_access']); ?>
+			&nbsp;
+		</dd>
+		<dt><?php echo __('Admin'); ?></dt>
+		<dd>
+			<?php echo h($role['Role']['perm_admin']); ?>
+			&nbsp;
+		</dd>
+		<dt><?php echo __('Site Admin'); ?></dt>
+		<dd>
+			<?php echo h($role['Role']['perm_site_admin']); ?>
+			&nbsp;
+		</dd>
 	</dl>
 </div>
-<div class="actions">
-	<ul>
-        <?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'globalActions', 'menuItem' => 'roles'));
+?>

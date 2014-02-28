@@ -1,8 +1,4 @@
 <div class="users view">
-<div class="actions" style="float:right;">
-	<ul><li><?php if ($isAclAdmin && ($me['org'] == $user['User']['org'] || $me['org'] == 'ADMIN')) echo $this->Html->link(__('Edit Profile', true), array('admin' => true, 'action' => 'edit', $user['User']['id'])); ?> </li></ul>
-	<ul><li><?php if ($me['id'] == $user['User']['id'] && (!$isAclAdmin)) echo $this->Html->link(__('Edit Profile', true), array('action' => 'edit', $user['User']['id'])); ?> </li></ul>
-</div>
 <h2><?php  echo __('User');?></h2>
 	<dl>
 		<dt><?php echo __('Id'); ?></dt>
@@ -22,7 +18,7 @@
 		</dd>
 		<dt><?php echo __('Role'); ?></dt>
 		<dd>
-			<?php echo h($user['Role']['name']); ?>		<!-- TODO ACL, check, My Profile not edit role_id. -->
+			<?php echo $this->Html->link($user['Role']['name'], array('controller' => 'roles', 'action' => 'view', $user['Role']['id'])); ?>
 			&nbsp;
 		</dd>
 		<dt><?php echo __('Autoalert'); ?></dt>
@@ -54,8 +50,8 @@
 		<dt><?php echo __('GPG Key'); ?></dt>
 		<dd>
 		<?php
-if (h($user['User']['gpgkey']) != 0) {
-	echo "<code>" + nl2br(h($user['User']['gpgkey'])) + "</code>";
+if (!empty($user['User']['gpgkey'])) {
+	echo "<code>" . nl2br(h($user['User']['gpgkey'])) . "</code>";
 } else {
 	echo "N/A";
 }
@@ -64,20 +60,7 @@ if (h($user['User']['gpgkey']) != 0) {
 		</dd>
 	</dl>
 </div>
-<div class="actions">
-	<ul>
-		<?php
-if ($isAclAdmin && ($me['org'] == $user['User']['org'] || $me['org'] == 'ADMIN')) { ?>
-		<li><?php echo $this->Html->link(__('Edit User', true), array('admin' => true, 'action' => 'edit', $user['User']['id'])); ?></li>
-	<?php
-} else if ($me['id'] == $user['User']['id'] && $me['org'] != 'ADMIN') {
-	?>
-	<li><?php echo $this->Html->link(__('Edit User', true), array('action' => 'edit', $user['User']['id'])); ?></li>
-	<?php
-}
-	?>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'globalActions', 'menuItem' => 'view'));
+?>
 
-		<li>&nbsp;</li>
-		<?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>

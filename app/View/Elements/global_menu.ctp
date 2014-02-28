@@ -21,6 +21,14 @@
 							<li><a href="/attributes/index">List Attributes</a></li>
 							<li><a href="/attributes/search">Search Attributes</a></li>
 							<li class="divider"></li>
+							<li><a href="/shadow_attributes/index">View Proposals</a></li>
+							<li><a href="/events/proposalEventIndex">Events with proposals</a></li>
+							<li class="divider"></li>
+							<li><a href="/tags/index">List Tags</a>
+							<?php if ($isAclTagger): ?>
+							<li><a href="/tags/add">Add Tag</a>
+							<?php endif; ?>
+							<li class="divider"></li>
 							<li><a href="/events/export">Export</a></li>
 							<?php if ($isAclAuth): ?>
 							<li><a href="/events/automation">Automation</a></li>
@@ -35,18 +43,17 @@
 							<b class="caret"></b>
 						</a>
 						<ul class="dropdown-menu">
-							<?php if ($isSiteAdmin): ?>
+							<?php if ($isAclRegexp): ?>
 							<li><a href="/admin/regexp/index">Import Regexp</a></li>
 							<li><a href="/admin/whitelists/index">Signature Whitelist</a></li>
 							<?php endif;?>
-							<?php if (!$isSiteAdmin): ?>
+							<?php if (!$isAclRegexp): ?>
 							<li><a href="/regexp/index">Import Regexp</a></li>
 							<li><a href="/whitelists/index">Signature Whitelist</a></li>
 							<?php endif;?>
 						</ul>
 					</li>
 
-					<?php if(!($me['email'] == "public")): ?>
 					<li class="dropdown">
 						<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 							Global Actions
@@ -54,33 +61,24 @@
 						</a>
 						<ul class="dropdown-menu">
 							<li><a href="/users/news">News</a></li>
-							<li><a href="/users/view/me">My Profile</a></li>
-							<li><a href="/users/memberslist">Members List</a></li>
-							<li><a href="/pages/display/doc/general">User Guide</a></li>
+							<?php if(!($me['email'] == "public")): ?>
+								<li><a href="/users/view/me">My Profile</a></li>
+								<li><a href="/users/memberslist">Members List</a></li>
+								<li><a href="/roles/index">Role Permissions</a></li>
+							<? endif; ?>
+							<li><a href="/pages/display/doc/quickstart">User Guide</a></li>
 							<li><a href="/users/terms">Terms &amp; Conditions</a></li>
+							
+							<?php if(!($me['email'] == "public")): ?>
+								<li><a href="/users/statistics">Statistics</a></li>
+							<? endif; ?>
+
 							<li class="divider"></li>
 							<li><a href="/users/logout">Log out</a></li>
 						</ul>
 					</li>
-					<?php endif;?>
 
-					<?php if($me['email'] == "public"): ?>
-					<li class="dropdown">
-                                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                                                        Global Actions
-                                                        <b class="caret"></b>
-                                                </a>
-                                                <ul class="dropdown-menu">
-							<li><a href="/users/news">News</a></li>
-                                                        <li><a href="/pages/display/doc/general">User Guide</a></li>
-							<li><a href="/users/terms">Terms &amp; Conditions</a></li>
-                                                        <li class="divider"></li>
-                                                        <li><a href="/users/logout">Log out</a></li>
-                                                </ul>
-                                        </li>
-					<?php endif;?>
-
-					<?php if (('true' == Configure::read('CyDefSIG.sync')) && ($isAclSync || $isAdmin)): ?>
+					<?php if (('true' == Configure::read('MISP.sync')) && ($isAclSync || $isAdmin)): ?>
 					<li class="dropdown">
 						<a class="dropdown-toggle" data-toggle="dropdown" href="#">
 							Sync Actions
@@ -107,10 +105,16 @@
 							<?php endif; ?>
 							<li><a href="/admin/roles/index">List Roles</a></li>
 							<?php if($isSiteAdmin): ?>
-							<li class="divider"></li>
-							<li><a href="/admin/users/email">Contact Users</a></li>
-							<li class="divider"></li>
-							<li><a href="/pages/display/administration">Administrative tools</a></li>
+								<li class="divider"></li>
+								<li><a href="/admin/users/email">Contact Users</a></li>
+								<li class="divider"></li>
+								<li><a href="/pages/display/administration">Administrative tools</a></li>
+								<?php if (Configure::read('MISP.background_jobs')): ?>
+									<li class="divider"></li>
+									<li><a href="/jobs/index">Jobs</a></li>
+									<li class="divider"></li>
+									<li><a href="/tasks">Scheduled Tasks</a></li>
+								<?php endif; ?>						
 							<?php endif; ?>
 						</ul>
 					</li>
@@ -129,6 +133,21 @@
 					</li>
 					<?php endif;?>
 
+
+					
+					<?php if(!($me['email'] == "public")): ?>
+					<li class="dropdown">
+						<a class="dropdown-toggle" data-toggle="dropdown" href="#">
+							Discussions
+							<b class="caret"></b>
+						</a>
+						<ul class="dropdown-menu">
+							<li><a href="/threads/index">List Discussions</a></li>
+							<li><a href="/posts/add">Start Discussion</a></li>
+						</ul>
+					</li>
+					<?php endif;?>
+
 				</ul>
 			</div>
 			<div class="nav-collapse collapse pull-right">
@@ -139,6 +158,11 @@
 
 			<div class="nav-collapse collapse pull-right" style="margin-top:10px">
 				<div class="nav" style="font-weight:bold">
+					<?php if ($proposalCount > 0): ?>
+						<span class="proposal_span"><a href="/events/proposalEventIndex" class="proposal_link"><?php echo $proposalCount . ' proposals in ' . $proposalEventCount; ?> events</a></span>
+					<?php else: ?>
+						<span><a href="/events/proposalEventIndex" class="proposal_link"><?php echo $proposalCount . ' proposals in ' . $proposalEventCount; ?> events</a></span>
+					<?php endif;?>
 					<span class="logoBlue">M</span><span class="logoGray">alware</span>
 					<span class="logoBlue">I</span><span class="logoGray">nformation </span>
 					<span class="logoBlue">S</span><span class="logoGray">haring</span>

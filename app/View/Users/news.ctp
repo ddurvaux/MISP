@@ -31,7 +31,7 @@ Many known bugs have been fixed.</p>
 <h3>March 2012</h3>
 <p><b>Terms and News</b><br>
 Terms and conditions have been enabled. You should only see this page once.<br>
-When new software updates of CyDefSIG are installed you will see the news page.</p>
+When new software updates of MISP are installed you will see the news page.</p>
 
 <h3>February 2012</h3>
 <p><b>Automation</b><br>
@@ -73,15 +73,7 @@ The authkey generation algorithm has also been improved.</p>
 A bug in the DNS attributes has been corrected.</p>
 
 </div>
-<div class="actions <?php echo $debugMode;?>">
-	<ul class="nav nav-list">
-		<li class="active"><a href="/users/news">News</a></li>
-		<?php if(!($me['email'] == "public")): ?>
-			<li><a href="/users/view/me">My Profile</a></li>
-			<li><a href="/users/memberslist">Members List</a></li>
-		<?endif;?>
-		<li><a href="/pages/display/doc/general">User Guide</a></li>
-		<li><a href="/users/terms">Terms & Conditions</a></li>
-	</ul>
-</div>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'globalActions', 'menuItem' => 'news'));
+?>
 

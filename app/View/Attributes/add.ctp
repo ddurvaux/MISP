@@ -1,50 +1,71 @@
-
 <div class="attributes form">
 <?php echo $this->Form->create('Attribute');?>
 	<fieldset>
 		<legend><?php echo __('Add Attribute'); ?></legend>
-<?php
-echo $this->Form->hidden('event_id');
-echo $this->Form->input('category', array(
-		'between' => $this->Html->div('forminfo', '', array('id' => 'AttributeCategoryDiv')),
-		'empty' => '(choose one)'
+		<?php
+		echo $this->Form->hidden('event_id');
+		echo $this->Form->input('category', array(
+				'empty' => '(choose one)'
+				));
+		echo $this->Form->input('type', array(
+				'empty' => '(first choose category)'
+				));
+		if ('true' == Configure::read('MISP.sync')) {
+			$initialDistribution = 3;
+			if (Configure::read('MISP.default_attribute_distribution') != null) {
+				if (Configure::read('MISP.default_attribute_distribution') === 'event') {
+					$initialDistribution = $currentDist;	
+				} else {
+					$initialDistribution = Configure::read('MISP.default_attribute_distribution');
+				}
+			}
+			echo $this->Form->input('distribution', array(
+				'options' => array($distributionLevels),
+				'label' => 'Distribution',
+				'selected' => $initialDistribution,
+			));
+		}
+		echo $this->Form->input('value', array(
+				'type' => 'textarea',
+				'error' => array('escape' => false),
+				'div' => 'input clear',
+				'class' => 'input-xxlarge'
 		));
-echo $this->Form->input('type', array(
-		'between' => $this->Html->div('forminfo', '', array('id' => 'AttributeTypeDiv')),
-		'empty' => '(first choose category)'
+		echo $this->Form->input('comment', array(
+				'type' => 'text',
+				'label' => 'Contextual Comment',
+				'error' => array('escape' => false),
+				'div' => 'input clear',
+				'class' => 'input-xxlarge'
 		));
-if ('true' == Configure::read('CyDefSIG.sync')) {
-	echo $this->Form->input('distribution', array('label' => 'Distribution', 'selected' => $maxDist,
-		'between' => $this->Html->div('forminfo', '', array('id' => 'AttributeDistributionDiv'))
-	));
-}
-echo $this->Form->input('to_ids', array(
-			'checked' => true,
-			'before' => $this->Html->div('forminfo', isset($attrDescriptions['signature']['formdesc']) ? $attrDescriptions['signature']['formdesc'] : $attrDescriptions['signature']['desc']),
-			'label' => 'IDS Signature?'
-));
-echo $this->Form->input('batch_import', array(
-		'type' => 'checkbox',
-		'after' => $this->Html->div('forminfo', 'Create multiple attributes one per line'),
-));
-echo $this->Form->input('value', array(
-			'type' => 'textarea',
-			'error' => array('escape' => false),
-));
-
-// link an onchange event to the form elements
-$this->Js->get('#AttributeCategory')->event('change', 'formCategoryChanged("#AttributeCategory")');
-$this->Js->get('#AttributeType')->event('change', 'showFormInfo("#AttributeType")');
-$this->Js->get('#AttributeDistribution')->event('change', 'showFormInfo("#AttributeDistribution")');
-?>
+		?>
+		<div class="input clear"></div>
+		<?php
+		echo $this->Form->input('to_ids', array(
+					'checked' => false,
+					'data-content' => isset($attrDescriptions['signature']['formdesc']) ? $attrDescriptions['signature']['formdesc'] : $attrDescriptions['signature']['desc'],
+					'label' => 'for Intrusion Detection System',
+		));
+		echo $this->Form->input('batch_import', array(
+				'type' => 'checkbox',
+				'data-content' => 'Create multiple attributes one per line',
+		));
+		// link an onchange event to the form elements
+		$this->Js->get('#AttributeCategory')->event('change', 'formCategoryChanged("#AttributeCategory")');
+		?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
+	<p style="color:red;font-weight:bold;display:none;" id="warning-message">Warning: You are about to share data that is of a classified nature (Attribution / targeting data). Make sure that you are authorised to share this.</p>
+<?php
+echo $this->Form->button('Submit', array('class' => 'btn btn-primary'));
+echo $this->Form->end();
+?>
 </div>
-<div class="actions">
-	<ul>
-		<?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>
+<?php 
+	$event['Event']['id'] = $this->request->data['Attribute']['event_id'];
+	$event['Event']['published'] = $published;
+	echo $this->element('side_menu', array('menuList' => 'event', 'menuItem' => 'addAttribute', 'event' => $event));
+?>
+
 <script type="text/javascript">
 //
 //Generate Category / Type filtering array
@@ -64,7 +85,6 @@ foreach ($categoryDefinitions as $category => $def) {
 ?>
 
 function formCategoryChanged(id) {
-	showFormInfo(id); // display the tooltip
 	// fill in the types
 	var options = $('#AttributeType').prop('options');
 	$('option', $('#AttributeType')).remove();
@@ -95,24 +115,56 @@ foreach ($distributionDescriptions as $type => $def) {
 }
 ?>
 
-function showFormInfo(id) {
-	idDiv = id+'Div';
-	// LATER use nice animations
-	//$(idDiv).hide('fast');
-	// change the content
-	var value = $(id).val();    // get the selected value
-	$(idDiv).html(formInfoValues[value]);    // search in a lookup table
+$(document).ready(function() {
 
-	// show it again
-	$(idDiv).fadeIn('slow');
-}
+	$("#AttributeType, #AttributeCategory, #Attribute, #AttributeDistribution").on('mouseover', function(e) {
+	    var $e = $(e.target);
+	    if ($e.is('option')) {
+	        $('#'+e.currentTarget.id).popover('destroy');
+	        $('#'+e.currentTarget.id).popover({
+	            trigger: 'manual',
+	            placement: 'right',
+	            content: formInfoValues[$e.val()],
+	        }).popover('show');
+	    }
+	});
 
-// hide the formInfo things
-$('#AttributeTypeDiv').hide();
-$('#AttributeCategoryDiv').hide();
-$('#AttributeType').prop('disabled', true);
-$('#AttributeDistributionDiv').hide();
+	$("input, label").on('mouseleave', function(e) {
+	    $('#'+e.currentTarget.id).popover('destroy');
+	});
 
+	$("input, label").on('mouseover', function(e) {
+		var $e = $(e.target);
+		$('#'+e.currentTarget.id).popover('destroy');
+        $('#'+e.currentTarget.id).popover({
+            trigger: 'focus',
+            placement: 'right',
+        }).popover('show');
+       // $('#'+e.currentTarget.id).on('mouseleave', $('#'+e.currentTarget.id).popover('destroy');
+        //$('#'+e.currentTarget.id).on('mouseout', $('#'+e.currentTarget.id).popover('destroy'));
+       
+	});
 
+	// workaround for browsers like IE and Chrome that do now have an onmouseover on the 'options' of a select.
+	// disadvangate is that user needs to click on the item to see the tooltip.
+	// no solutions exist, except to generate the select completely using html.
+	$("#AttributeType, #AttributeCategory, #Attribute, #AttributeDistribution").on('change', function(e) {
+		if (this.id === "AttributeCategory") {
+			var select = document.getElementById("AttributeCategory");
+			if (select.value === 'Attribution' || select.value === 'Targeting data') {
+				$("#warning-message").show();
+			} else {
+				$("#warning-message").hide();
+			}
+		}
+	    var $e = $(e.target);
+        $('#'+e.currentTarget.id).popover('destroy');
+        $('#'+e.currentTarget.id).popover({
+            trigger: 'focus',
+            placement: 'right',
+            content: formInfoValues[$e.val()],
+        }).popover('show');
+	});
+});
 </script>
 <?php echo $this->Js->writeBuffer(); // Write cached scripts

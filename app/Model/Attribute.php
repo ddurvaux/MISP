@@ -22,11 +22,12 @@ class Attribute extends AppModel {
 			'change' => 'full'),
 		'Trim',
 		'Containable',
-		'Regexp' => array('fields' => array('value', 'value2')),
-		'Blacklist' => array('fields' => array('value'))
+		'Regexp' => array('fields' => array('value')),
 	);
 
 /**
+ * hasMany relation to shadow attributes
+ *
  * Display field
  *
  * @var string
@@ -41,15 +42,16 @@ class Attribute extends AppModel {
 	public $virtualFields = array(
 			'value' => 'IF (Attribute.value2="", Attribute.value1, CONCAT(Attribute.value1, "|", Attribute.value2))',
 			'category_order' => 'IF (Attribute.category="Internal reference", "a",
-			IF (Attribute.category="Antivirus detection", "b",
-			IF (Attribute.category="Payload delivery", "c",
-			IF (Attribute.category="Payload installation", "d",
-			IF (Attribute.category="Artifacts dropped", "e",
-			IF (Attribute.category="Persistence mechanism", "f",
-			IF (Attribute.category="Network activity", "g",
-			IF (Attribute.category="Payload type", "h",
-			IF (Attribute.category="Attribution", "i",
-			IF (Attribute.category="External analysis", "j", "k"))))))))))'
+			IF (Attribute.category="Targeting data", "b",
+ 			IF (Attribute.category="Antivirus detection", "c",
+ 			IF (Attribute.category="Payload delivery", "d",
+ 			IF (Attribute.category="Payload installation", "e",
+ 			IF (Attribute.category="Artifacts dropped", "f",
+ 			IF (Attribute.category="Persistence mechanism", "g",
+ 			IF (Attribute.category="Network activity", "h",
+ 			IF (Attribute.category="Payload type", "i",
+ 			IF (Attribute.category="Attribution", "j",
+ 			IF (Attribute.category="External analysis", "k", "l")))))))))))'
 	); // TODO hardcoded
 
 /**
@@ -60,15 +62,18 @@ class Attribute extends AppModel {
  */
 	public $fieldDescriptions = array(
 			'signature' => array('desc' => 'Is this attribute eligible to automatically create an IDS signature (network IDS or host IDS) out of it ?'),
-			'private' => array('desc' => 'Prevents upload of this single Attribute to other CyDefSIG servers', 'formdesc' => 'Prevents upload of <em>this single Attribute</em> to other CyDefSIG servers.<br/>Used only when the Event is NOT set as Private')
+			'distribution' => array('desc' => 'Describes who will have access to the event.')
 	);
 
 	public $distributionDescriptions = array(
-		'Your organization only' => array('desc' => 'This field determines the current distribution of the even', 'formdesc' => "This setting will only allow members of your organisation on this server to see it."),
-		'This server-only' => array('desc' => 'This field determines the current distribution of the even', 'formdesc' => "This setting will only allow members of any organisation on this server to see it."),
-		'This Community-only' => array('desc' => 'This field determines the current distribution of the even', 'formdesc' => "Users that are part of your MISP community will be able to see the event. This includes your own organisation, organisations on this MISP server and organisations running MISP servers that synchronise with this server. Any other organisations connected to such linked servers will be restricted from seeing the event. Use this option if you are on the central hub of this community."), // former Community
-		'Connected communities' => array('desc' => 'This field determines the current distribution of the even', 'formdesc' => "Users that are part of your MISP community will be able to see the event. This includes all organisations on this MISP server, all organisations on MISP servers synchronising with this server and the hosting organisations of servers that connect to those afore mentioned servers (so basically any server that is 2 hops away from this one). Any other organisations connected to linked servers that are 2 hops away from this will be restricted from seeing the event. Use this option if this server isn't the central MISP hub of the community but is connected to it."),
-		'All communities' => array('desc' => 'This field determines the current distribution of the even', 'formdesc' => "This will share the event with all MISP communities, allowing the event to be freely propagated from one server to the next."),
+			0 => array('desc' => 'This field determines the current distribution of the event', 'formdesc' => "This setting will only allow members of your organisation on this server to see it."),
+			1 => array('desc' => 'This field determines the current distribution of the event', 'formdesc' => "Users that are part of your MISP community will be able to see the event. This includes your own organisation, organisations on this MISP server and organisations running MISP servers that synchronise with this server. Any other organisations connected to such linked servers will be restricted from seeing the event. Use this option if you are on the central hub of this community."), // former Community
+			2 => array('desc' => 'This field determines the current distribution of the event', 'formdesc' => "Users that are part of your MISP community will be able to see the event. This includes all organisations on this MISP server, all organisations on MISP servers synchronising with this server and the hosting organisations of servers that connect to those afore mentioned servers (so basically any server that is 2 hops away from this one). Any other organisations connected to linked servers that are 2 hops away from this will be restricted from seeing the event. Use this option if this server isn't the central MISP hub of the community but is connected to it."),
+			3 => array('desc' => 'This field determines the current distribution of the event', 'formdesc' => "This will share the event with all MISP communities, allowing the event to be freely propagated from one server to the next."),
+	);
+
+	public $distributionLevels = array(
+			0 => 'Your organisation only', 1 => 'This community only', 2 => 'Connected communities', 3 => 'All communities'
 	);
 
 	// these are definition of possible types + their descriptions and maybe later other behaviors
@@ -87,25 +92,28 @@ class Attribute extends AppModel {
 	);
 
 	public $typeDefinitions = array(
-			'md5' => array('desc' => 'A checksum in md5 format', 'formdesc' => "You are encouraged to use filename|md5 instead. <br/>A checksum in md5 format, only use this if you don't know the correct filename"),
-			'sha1' => array('desc' => 'A checksum in sha1 format', 'formdesc' => "You are encouraged to use filename|sha1 instead. <br/>A checksum in sha1 format, only use this if you don't know the correct filename"),
+			'md5' => array('desc' => 'A checksum in md5 format', 'formdesc' => "You are encouraged to use filename|md5 instead. A checksum in md5 format, only use this if you don't know the correct filename"),
+			'sha1' => array('desc' => 'A checksum in sha1 format', 'formdesc' => "You are encouraged to use filename|sha1 instead. A checksum in sha1 format, only use this if you don't know the correct filename"),
+			'sha256' => array('desc' => 'A checksum in sha256 format', 'formdesc' => "You are encouraged to use filename|sha256 instead. A checksum in sha256 format, only use this if you don't know the correct filename"),
 			'filename' => array('desc' => 'Filename'),
 			'filename|md5' => array('desc' => 'A filename and an md5 hash separated by a |', 'formdesc' => "A filename and an md5 hash separated by a | (no spaces)"),
 			'filename|sha1' => array('desc' => 'A filename and an sha1 hash separated by a |', 'formdesc' => "A filename and an sha1 hash separated by a | (no spaces)"),
+			'filename|sha256' => array('desc' => 'A filename and an sha256 hash separated by a |', 'formdesc' => "A filename and an sha256 hash separated by a | (no spaces)"),
 			'ip-src' => array('desc' => "A source IP address of the attacker"),
-			'ip-dst' => array('desc' => 'A destination IP address of the attacker or C&C server', 'formdesc' => "A destination IP address of the attacker or C&C server. <br/>Also set the IDS flag on when this IP is hardcoded in malware"),
-			'hostname' => array('desc' => 'A full host/dnsname of an attacker', 'formdesc' => "A full host/dnsname of an attacker. <br/>Also set the IDS flag on when this hostname is hardcoded in malware"),
-			'domain' => array('desc' => 'A domain name used in the malware', 'formdesc' => "A domain name used in the malware. <br/>Use this instead of hostname when the upper domain is <br/>important or can be used to create links between events."),
+			'ip-dst' => array('desc' => 'A destination IP address of the attacker or C&C server', 'formdesc' => "A destination IP address of the attacker or C&C server. Also set the IDS flag on when this IP is hardcoded in malware"),
+			'hostname' => array('desc' => 'A full host/dnsname of an attacker', 'formdesc' => "A full host/dnsname of an attacker. Also set the IDS flag on when this hostname is hardcoded in malware"),
+			'domain' => array('desc' => 'A domain name used in the malware', 'formdesc' => "A domain name used in the malware. Use this instead of hostname when the upper domain is important or can be used to create links between events."),
 			'email-src' => array('desc' => "The email address (or domainname) used to send the malware."),
 			'email-dst' => array('desc' => "A recipient email address", 'formdesc' => "A recipient email address that is not related to your constituency."),
 			'email-subject' => array('desc' => "The subject of the email"),
 			'email-attachment' => array('desc' => "File name of the email attachment."),
 			'url' => array('desc' => 'url'),
+			'http-method' => array('desc' => "HTTP method used by the malware (e.g. POST, GET, ...)."),
 			'user-agent' => array('desc' => "The user-agent used by the malware in the HTTP request."),
 			'regkey' => array('desc' => "Registry key or value"),
 			'regkey|value' => array('desc' => "Registry value + data separated by |"),
 			'AS' => array('desc' => 'Autonomous system'),
-			'snort' => array('desc' => 'An IDS rule in Snort rule-format', 'formdesc' => "An IDS rule in Snort rule-format. <br/>This rule will be automatically rewritten in the NIDS exports."),
+			'snort' => array('desc' => 'An IDS rule in Snort rule-format', 'formdesc' => "An IDS rule in Snort rule-format. This rule will be automatically rewritten in the NIDS exports."),
 			'pattern-in-file' => array('desc' => 'Pattern in file that identifies the malware'),
 			'pattern-in-traffic' => array('desc' => 'Pattern in network traffic that identifies the malware'),
 			'pattern-in-memory' => array('desc' => 'Pattern in memory dump that identifies the malware'),
@@ -114,11 +122,17 @@ class Attribute extends AppModel {
 			'attachment' => array('desc' => 'Attachment with external information', 'formdesc' => "Please upload files using the <em>Upload Attachment</em> button."),
 			'malware-sample' => array('desc' => 'Attachment containing encrypted malware sample', 'formdesc' => "Please upload files using the <em>Upload Attachment</em> button."),
 			'link' => array('desc' => 'Link to an external information'),
-			'comment' => array('desc' => 'Comment or description in a human language', 'formdesc' => 'Comment or description in a human language. <br/> This will not be correlated with other attributes (NOT IMPLEMENTED YET)'),
+			'comment' => array('desc' => 'Comment or description in a human language', 'formdesc' => 'Comment or description in a human language.  This will not be correlated with other attributes (NOT IMPLEMENTED YET)'),
 			'text' => array('desc' => 'Name, ID or a reference'),
 			'other' => array('desc' => 'Other attribute'),
 			'named pipe' => array('desc' => 'Named pipe, use the format \\.\pipe\<PipeName>'),
 			'mutex' => array('desc' => 'Mutex, use the format \BaseNamedObjects\<Mutex>'),
+ 			'target-user' => array('desc' => 'Attack Targets Username(s)'),
+ 			'target-email' => array('desc' => 'Attack Targets Email(s)'),
+ 			'target-machine' => array('desc' => 'Attack Targets Machine Name(s)'),
+ 			'target-org' => array('desc' => 'Attack Targets Department or Orginization(s)'),
+ 			'target-location' => array('desc' => 'Attack Targets Physical Location(s)'),
+ 			'target-external' => array('desc' => 'External Target Orginizations Affected by this Attack'),
 	);
 
 	// definitions of categories
@@ -127,37 +141,42 @@ class Attribute extends AppModel {
 					'desc' => 'Reference used by the publishing party (e.g. ticket number)',
 					'types' => array('link', 'comment', 'text', 'other')
 					),
+ 			'Targeting data' => array(
+ 					'desc' => 'Internal Attack Targeting and Compromise Information',
+ 					'formdesc' => 'Targeting information to include recipient email, infected machines, department, and or locations.<br/>',
+ 					'types' => array('target-user', 'target-email', 'target-machine', 'target-org', 'target-location', 'target-external', 'comment')
+ 					),
 			'Antivirus detection' => array(
 					'desc' => 'All the info about how the malware is detected by the antivirus products',
-					'formdesc' => 'List of anti-virus vendors detecting the malware or information on detection performance (e.g. 13/43 or 67%).<br/>Attachment with list of detection or link to VirusTotal could be placed here as well.',
+					'formdesc' => 'List of anti-virus vendors detecting the malware or information on detection performance (e.g. 13/43 or 67%). Attachment with list of detection or link to VirusTotal could be placed here as well.',
 					'types' => array('link', 'comment', 'text', 'attachment', 'other')
 					),
 			'Payload delivery' => array(
 					'desc' => 'Information about how the malware is delivered',
-					'formdesc' => 'Information about the way the malware payload is initially delivered, <br/>for example information about the email or web-site, vulnerability used, originating IP etc. <br/>Malware sample itself should be attached here.',
-					'types' => array('md5', 'sha1', 'filename', 'filename|md5', 'filename|sha1', 'ip-src', 'ip-dst', 'hostname', 'domain', 'email-src', 'email-dst', 'email-subject', 'email-attachment', 'url', 'ip-dst', 'user-agent', 'AS', 'pattern-in-file', 'pattern-in-traffic', 'yara', 'attachment', 'malware-sample', 'link', 'comment', 'text', 'vulnerability', 'other')
+					'formdesc' => 'Information about the way the malware payload is initially delivered, for example information about the email or web-site, vulnerability used, originating IP etc. Malware sample itself should be attached here.',
+					'types' => array('md5', 'sha1', 'sha256','filename', 'filename|md5', 'filename|sha1', 'filename|sha256', 'ip-src', 'ip-dst', 'hostname', 'domain', 'email-src', 'email-dst', 'email-subject', 'email-attachment', 'url', 'ip-dst', 'user-agent', 'AS', 'pattern-in-file', 'pattern-in-traffic', 'yara', 'attachment', 'malware-sample', 'link', 'comment', 'text', 'vulnerability', 'other')
 					),
 			'Artifacts dropped' => array(
 					'desc' => 'Any artifact (files, registry keys etc.) dropped by the malware or other modifications to the system',
-					'types' => array('md5', 'sha1', 'filename', 'filename|md5', 'filename|sha1', 'regkey', 'regkey|value', 'pattern-in-file', 'pattern-in-memory', 'yara', 'attachment', 'malware-sample', 'comment', 'text', 'other', 'named pipe', 'mutex')
+					'types' => array('md5', 'sha1', 'sha256', 'filename', 'filename|md5', 'filename|sha1', 'filename|sha256', 'regkey', 'regkey|value', 'pattern-in-file', 'pattern-in-memory', 'yara', 'attachment', 'malware-sample', 'comment', 'text', 'other', 'named pipe', 'mutex')
 					),
 			'Payload installation' => array(
 					'desc' => 'Info on where the malware gets installed in the system',
-					'formdesc' => 'Location where the payload was placed in the system and the way it was installed.<br/>For example, a filename|md5 type attribute can be added here like this:<br/>c:\\windows\\system32\\malicious.exe|41d8cd98f00b204e9800998ecf8427e.',
-					'types' => array('md5', 'sha1', 'filename', 'filename|md5', 'filename|sha1', 'pattern-in-file', 'pattern-in-traffic', 'pattern-in-memory', 'yara', 'vulnerability', 'attachment', 'malware-sample', 'comment', 'text', 'other')
+					'formdesc' => 'Location where the payload was placed in the system and the way it was installed. For example, a filename|md5 type attribute can be added here like this: c:\\windows\\system32\\malicious.exe|41d8cd98f00b204e9800998ecf8427e.',
+					'types' => array('md5', 'sha1', 'sha256', 'filename', 'filename|md5', 'filename|sha1', 'filename|sha256', 'pattern-in-file', 'pattern-in-traffic', 'pattern-in-memory', 'yara', 'vulnerability', 'attachment', 'malware-sample', 'comment', 'text', 'other')
 					),
 			'Persistence mechanism' => array(
 					'desc' => 'Mechanisms used by the malware to start at boot',
-					'formdesc' => 'Mechanisms used by the malware to start at boot.<br/>This could be a registry key, legitimate driver modification, LNK file in startup',
+					'formdesc' => 'Mechanisms used by the malware to start at boot. This could be a registry key, legitimate driver modification, LNK file in startup',
 					'types' => array('filename', 'regkey', 'regkey|value', 'comment', 'text', 'other')
 					),
 			'Network activity' => array(
 					'desc' => 'Information about network traffic generated by the malware',
-					'types' => array('ip-src', 'ip-dst', 'hostname', 'domain', 'email-dst', 'url', 'user-agent', 'AS', 'snort', 'pattern-in-file', 'pattern-in-traffic', 'attachment', 'comment', 'text', 'other')
+					'types' => array('ip-src', 'ip-dst', 'hostname', 'domain', 'email-dst', 'url', 'user-agent', 'http-method', 'AS', 'snort', 'pattern-in-file', 'pattern-in-traffic', 'attachment', 'comment', 'text', 'other')
 					),
 			'Payload type' => array(
 					'desc' => 'Information about the final payload(s)',
-					'formdesc' => 'Information about the final payload(s).<br/>Can contain a function of the payload, e.g. keylogger, RAT, or a name if identified, such as Poison Ivy.',
+					'formdesc' => 'Information about the final payload(s). Can contain a function of the payload, e.g. keylogger, RAT, or a name if identified, such as Poison Ivy.',
 					'types' => array('comment', 'text', 'other')
 					),
 			'Attribution' => array(
@@ -166,8 +185,8 @@ class Attribute extends AppModel {
 					),
 			'External analysis' => array(
 					'desc' => 'Any other result from additional analysis of the malware like tools output',
-					'formdesc' => 'Any other result from additional analysis of the malware like tools output<br/>Examples: pdf-parser output, automated sandbox analysis, reverse engineering report.',
-					'types' => array('md5', 'sha1', 'filename', 'filename|md5', 'filename|sha1', 'ip-src', 'ip-dst', 'hostname', 'domain', 'url', 'user-agent', 'regkey', 'regkey|value', 'AS', 'snort', 'pattern-in-file', 'pattern-in-traffic', 'pattern-in-memory', 'vulnerability', 'attachment', 'malware-sample', 'link', 'comment', 'text', 'other')
+					'formdesc' => 'Any other result from additional analysis of the malware like tools output Examples: pdf-parser output, automated sandbox analysis, reverse engineering report.',
+					'types' => array('md5', 'sha1', 'sha256','filename', 'filename|md5', 'filename|sha1', 'filename|sha256', 'ip-src', 'ip-dst', 'hostname', 'domain', 'url', 'user-agent', 'regkey', 'regkey|value', 'AS', 'snort', 'pattern-in-file', 'pattern-in-traffic', 'pattern-in-memory', 'vulnerability', 'attachment', 'malware-sample', 'link', 'comment', 'text', 'other')
 					),
 			'Other' => array(
 					'desc' => 'Attributes that are not part of any other category',
@@ -175,7 +194,7 @@ class Attribute extends AppModel {
 					)
 	);
 
-	public $order = array("Attribute.event_id" => "DESC", "Attribute.type" => "ASC");
+	public $order = array("Attribute.event_id" => "DESC");
 
 /**
  * Validation rules
@@ -207,6 +226,7 @@ class Attribute extends AppModel {
 		'category' => array(
 			'rule' => array('inList', array(
 							'Internal reference',
+							'Targeting data',
 							'Antivirus detection',
 							'Payload delivery',
 							'Payload installation',
@@ -277,61 +297,20 @@ class Attribute extends AppModel {
 				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 			),
 		),
-		'private' => array(
-				'boolean' => array(
-						'rule' => array('boolean'),
-						//'message' => 'Your custom message here',
-						'allowEmpty' => true,
-						'required' => false,
-						//'last' => false, // Stop validation after this rule
-						//'on' => 'create', // Limit validation to 'create' or 'update' operations
-				),
+		'distribution' => array(
+				'rule' => array('inList', array('0', '1', '2', '3')),
+				'message' => 'Options : Your organisation only, This community only, Connected communities, All communities',
+				//'allowEmpty' => false,
+				'required' => true,
+				//'last' => false, // Stop validation after this rule
+				//'on' => 'create', // Limit validation to 'create' or 'update' operations
 		),
 	);
 
 	public function __construct($id = false, $table = null, $ds = null) {
 		parent::__construct($id, $table, $ds);
 
-		$this->virtualFields = Set::merge($this->virtualFields,array(
-			//'distribution' => 'IF (Attribute.private=true, "Your organization only", IF (Attribute.cluster=true, "This Community-only", "All communities"))',
-			'distribution' => 'IF (Attribute.private=true AND Attribute.cluster=false, "Your organization only", IF (Attribute.private=true AND Attribute.cluster=true, "This server-only", IF (Attribute.private=false AND Attribute.cluster=true, "This Community-only", IF (Attribute.communitie=true, "Connected communities" , "All communities"))))',
-		));
-
-		$this->fieldDescriptions = Set::merge($this->fieldDescriptions,array(
-			'distribution' => array('desc' => 'This fields indicates the intended distribution of the attribute (same as when adding an event, see Add Event)'),
-		));
-
-		$this->validate = Set::merge($this->validate,array(
-			'cluster' => array(
-				'boolean' => array(
-					'rule' => array('boolean'),
-					//'message' => 'Your custom message here',
-					//'allowEmpty' => false,
-					'required' => false,
-					//'last' => false, // Stop validation after this rule
-					//'on' => 'create', // Limit validation to 'create' or 'update' operations
-				),
-			),
-			'communitie' => array(
-				'boolean' => array(
-					'rule' => array('boolean'),
-					//'message' => 'Your custom message here',
-					//'allowEmpty' => false,
-					'required' => false,
-					//'last' => false, // Stop validation after this rule
-					//'on' => 'create', // Limit validation to 'create' or 'update' operations
-				),
-			),
-			'distribution' => array(
-				'rule' => array('inList', array("Your organization only", "This server-only", "This Community-only", "Connected communities", "All communities")),
-					//'message' => 'Your custom message here',
-					'allowEmpty' => false,
-					'required' => false,
-					//'last' => false, // Stop validation after this rule
-					//'on' => 'create', // Limit validation to 'create' or 'update' operations
-				),
-			));
-	}
+}
 
 	//The Associations below have been created with all possible keys, those that are not needed can be removed
 
@@ -358,12 +337,6 @@ class Attribute extends AppModel {
  * @return bool always true
  */
 	public function beforeSave($options = array()) {
-		// increment the revision number
-		if (empty($this->data['Attribute']['revision'])) {
-			$this->data['Attribute']['revision'] = 0;
-		}
-		$this->data['Attribute']['revision'] = 1 + $this->data['Attribute']['revision'];
-
 		// explode value of composite type in value1 and value2
 		// or copy value to value1 if not composite type
 		if (!empty($this->data['Attribute']['type'])) {
@@ -383,15 +356,18 @@ class Attribute extends AppModel {
 				$this->data['Attribute']['value2'] = '';
 			}
 		}
+		// update correlation... (only needed here if there's an update)
+ 		$this->__beforeSaveCorrelation($this->data['Attribute']);
 		// always return true after a beforeSave()
 		return true;
 	}
 
-	public function afterSave($created) {
-		// update correlation..
+	public function afterSave($created, $options = array()) {
+		// update correlation...
 		$this->__afterSaveCorrelation($this->data['Attribute']);
 
 		$result = true;
+
 		// if the 'data' field is set on the $this->data then save the data to the correct file
 		if (isset($this->data['Attribute']['type']) && $this->typeIsAttachment($this->data['Attribute']['type']) && !empty($this->data['Attribute']['data'])) {
 			$result = $result && $this->saveBase64EncodedAttachment($this->data['Attribute']); // TODO : is this correct?
@@ -419,43 +395,10 @@ class Attribute extends AppModel {
 
 	}
 
-	public function massageData(&$data) {
-		if(!isset($data['Attribute']['distribution'])) return $data;
-		switch ($data['Attribute']['distribution']) {
-			case 'Your organization only':
-				$data['Attribute']['private'] = true;
-				$data['Attribute']['cluster'] = false;
-				$data['Attribute']['communitie'] = false;
-				break;
-			case 'This server-only': // TODO
-				$data['Attribute']['private'] = true;
-				$data['Attribute']['cluster'] = true;
-				$data['Attribute']['communitie'] = false;
-				break;
-			case 'This Community-only':
-				$data['Attribute']['private'] = false;
-				$data['Attribute']['cluster'] = true;
-				$data['Attribute']['communitie'] = false;
-				break;
-			case 'Connected communities': // TODO
-				$data['Attribute']['private'] = false;
-				$data['Attribute']['cluster'] = false;
-				$data['Attribute']['communitie'] = true;
-				break;
-			case 'All communities':
-				$data['Attribute']['private'] = false;
-				$data['Attribute']['cluster'] = false;
-				$data['Attribute']['communitie'] = false;
-				break;
-		}
-		return $data;
-	}
-
 	public function beforeValidate($options = array()) {
 		parent::beforeValidate();
 
 		// remove leading and trailing blanks
-		//$this->trimStringFields(); // TODO
 		$this->data['Attribute']['value'] = trim($this->data['Attribute']['value']);
 
 		if (!isset($this->data['Attribute']['type'])) {
@@ -466,15 +409,29 @@ class Attribute extends AppModel {
 			// lowercase these things
 			case 'md5':
 			case 'sha1':
+			case 'sha256':
 			case 'domain':
 			case 'hostname':
 				$this->data['Attribute']['value'] = strtolower($this->data['Attribute']['value']);
 				break;
 			case 'filename|md5':
 			case 'filename|sha1':
+			case 'filename|sha256':
 				$pieces = explode('|', $this->data['Attribute']['value']);
 				$this->data['Attribute']['value'] = $pieces[0] . '|' . strtolower($pieces[1]);
 				break;
+		}
+
+		// uppercase the following types
+		switch($this->data['Attribute']['type']) {
+			case 'http-method':
+				$this->data['Attribute']['value'] = strtoupper($this->data['Attribute']['value']);
+		        break;
+        }
+
+		// set to_ids if it doesn't exist
+		if (empty($this->data['Attribute']['to_ids'])) {
+		    $this->data['Attribute']['to_ids'] = 0;
 		}
 
 		// generate UUID if it doesn't exist
@@ -482,6 +439,17 @@ class Attribute extends AppModel {
 			$this->data['Attribute']['uuid'] = String::uuid();
 		}
 
+		// generate timestamp if it doesn't exist
+		if (empty($this->data['Attribute']['timestamp'])) {
+			$date = new DateTime();
+			$this->data['Attribute']['timestamp'] = $date->getTimestamp();
+		}
+		$result = $this->runRegexp($this->data['Attribute']['type'], $this->data['Attribute']['value']);
+		if (!$result) {
+			$this->invalidate('value', 'This value is blocked by a regular expression in the import filters.');
+		} else {
+			$this->data['Attribute']['value'] = $result;
+		}
 		// always return true, otherwise the object cannot be saved
 		return true;
 	}
@@ -509,7 +477,6 @@ class Attribute extends AppModel {
 		if (0 != $this->find('count', $params)) {
 			return false;
 		}
-
 		// Say everything is fine
 		return true;
 	}
@@ -542,6 +509,20 @@ class Attribute extends AppModel {
 					$returnValue = 'Checksum has invalid length or format. Please double check the value or select "other" for a type.';
 				}
 				break;
+			case 'sha256':
+				if (preg_match("#^[0-9a-f]{64}$#", $value)) {
+					$returnValue = true;
+				} else {
+					$returnValue = 'Checksum has invalid length or format. Please double check the value or select "other" for a type.';
+				}
+				break;
+			case 'http-method':
+				if (preg_match("#(OPTIONS|GET|HEAD|POST|PUT|DELETE|TRACE|CONNECT|PROPFIND|PROPPATCH|MKCOL|COPY|MOVE|LOCK|UNLOCK|VERSION-CONTROL|REPORT|CHECKOUT|CHECKIN|UNCHECKOUT|MKWORKSPACE|UPDATE|LABEL|MERGE|BASELINE-CONTROL|MKACTIVITY|ORDERPATCH|ACL|PATCH|SEARCH)#", $value)) {
+				    $returnValue = true;
+				} else {
+					$returnValue = 'Unknown HTTP method.';
+				}
+				break;
 			case 'filename':
 				// no newline
 				if (!preg_match("#\n#", $value)) {
@@ -559,6 +540,14 @@ class Attribute extends AppModel {
 			case 'filename|sha1':
 				// no newline
 				if (preg_match("#^.+\|[0-9a-f]{40}$#", $value)) {
+					$returnValue = true;
+				} else {
+					$returnValue = 'Checksum has invalid length or format. Please double check the value or select "other" for a type.';
+				}
+				break;
+			case 'filename|sha256':
+				// no newline
+				if (preg_match("#^.+\|[0-9a-f]{64}$#", $value)) {
 					$returnValue = true;
 				} else {
 					$returnValue = 'Checksum has invalid length or format. Please double check the value or select "other" for a type.';
@@ -667,7 +656,7 @@ class Attribute extends AppModel {
 				}
 				break;
 			case 'vulnerability':
-				if (preg_match("#^(CVE-)[0-9]{4}(-)[0-9]{4}$#", $value)) {
+				if (preg_match("#^(CVE-)[0-9]{4}(-)[0-9]{4,6}$#", $value)) {
 					$returnValue = true;
 				} else {
 					$returnValue = 'Invalid format. Expected: CVE-xxxx-xxxx.';
@@ -679,10 +668,6 @@ class Attribute extends AppModel {
 				}
 				break;
 			case 'mutex':
-				if (preg_match('#^(\\\\BaseNamedObjects\\\\)#', $value) && !preg_match("#\n#", $value)) {
-					$returnValue = true;
-				}
-				break;
 			case 'AS':
 			case 'snort':
 			case 'pattern-in-file':
@@ -703,14 +688,43 @@ class Attribute extends AppModel {
 			case 'other':
 				$returnValue = true;
 				break;
+ 			case 'target-user':
+ 				// no newline
+ 				if (!preg_match("#\n#", $value)) {
+ 					$returnValue = true;
+ 				}
+ 				break;
+ 			case 'target-email':
+ 				if (preg_match("#^[A-Z0-9._%+-]*@[A-Z0-9.-]+\.[A-Z]{2,4}$#i", $value)) {
+ 					$returnValue = true;
+ 				} else {
+ 					$returnValue = 'Email address has invalid format. Please double check the value or select "other" for a type.';
+ 				}
+ 				break;
+ 			case 'target-machine':
+ 				// no newline
+ 				if (!preg_match("#\n#", $value)) {
+ 					$returnValue = true;
+ 				}
+ 				break;
+ 			case 'target-org':
+ 				// no newline
+ 				if (!preg_match("#\n#", $value)) {
+ 					$returnValue = true;
+ 				}
+ 				break;
+ 			case 'target-location':
+ 				// no newline
+ 				if (!preg_match("#\n#", $value)) {
+ 					$returnValue = true;
+ 				}
+ 				break;
+ 			case 'target-external':
+ 				// no newline
+ 				if (!preg_match("#\n#", $value)) {
+ 					$returnValue = true;
+ 				}
 		}
-
-		// default action is to return false
-		/*
-		if (!$returnValue) {
-			$returnValue = true;
-		}
-		*/
 		return $returnValue;
 	}
 
@@ -830,7 +844,7 @@ class Attribute extends AppModel {
  *
  * @return void
  */
-	public function uploadAttachment($fileP, $realFileName, $malware, $eventId = null, $category = null, $extraPath = '', $fullFileName = '') {
+	public function uploadAttachment($fileP, $realFileName, $malware, $eventId = null, $category = null, $extraPath = '', $fullFileName = '', $dist, $fromGFI = false) {
 		// Check if there were problems with the file upload
 		// only keep the last part of the filename, this should prevent directory attacks
 		$filename = basename($fileP);
@@ -839,19 +853,23 @@ class Attribute extends AppModel {
 		// save the file-info in the database
 		$this->create();
 		$this->data['Attribute']['event_id'] = $eventId;
+		$this->data['Attribute']['distribution'] = $dist;
 		if ($malware) {
 			$md5 = !$tmpfile->size() ? md5_file($fileP) : $tmpfile->md5();
 			$this->data['Attribute']['category'] = $category ? $category : "Payload delivery";
 			$this->data['Attribute']['type'] = "malware-sample";
 			$this->data['Attribute']['value'] = $fullFileName ? $fullFileName . '|' . $md5 : $filename . '|' . $md5; // TODO gives problems with bigger files
 			$this->data['Attribute']['to_ids'] = 1; // LATER let user choose to send this to IDS
+			if ($fromGFI)$this->data['Attribute']['comment'] = 'GFI import';
 		} else {
 			$this->data['Attribute']['category'] = $category ? $category : "Artifacts dropped";
 			$this->data['Attribute']['type'] = "attachment";
 			$this->data['Attribute']['value'] = $fullFileName ? $fullFileName : $realFileName;
 			$this->data['Attribute']['to_ids'] = 0;
+			if ($fromGFI)$this->data['Attribute']['comment'] = 'GFI import';
 		}
 
+		//???
 		if ($this->save($this->data)) {
 			// attribute saved correctly in the db
 		} else {
@@ -861,11 +879,9 @@ class Attribute extends AppModel {
 		// no errors in file upload, entry already in db, now move the file where needed and zip it if required.
 		// no sanitization is required on the filename, path or type as we save
 		// create directory structure
-		if (PHP_OS == 'WINNT') {
-			$rootDir = APP . "files" . DS . $eventId;
-		} else {
-			$rootDir = APP . "files" . DS . $eventId;
-		}
+		// ???
+		$rootDir = APP . "files" . DS . $eventId;
+		
 		$dir = new Folder($rootDir, true);
 		// move the file to the correct location
 		$destpath = $rootDir . DS . $this->getId(); // id of the new attribute in the database
@@ -890,172 +906,95 @@ class Attribute extends AppModel {
 		}
 	}
 
-	private function __afterSaveCorrelation($attribute) {
-		$this->Correlation = ClassRegistry::init('Correlation');
-		$dummy = $this->Correlation->deleteAll(array('OR' => array('Correlation.attribute_id' => $attribute['id'])), false);
-		$dummy = $this->Correlation->deleteAll(array('OR' => array('Correlation.1_attribute_id' => $attribute['id'])), false);
-		// re-add
-		$this->setRelatedAttributes($attribute, array('Attribute.id', 'Attribute.event_id', 'Attribute.private', 'Attribute.cluster', 'Event.date', 'Event.org'));
-		// update where refered..
-		$this->updateRelatedAttributes($attribute, array('Attribute.id', 'Attribute.event_id', 'Attribute.private', 'Attribute.cluster', 'Event.date', 'Event.org'));
+	public function __beforeSaveCorrelation($a) {
+
+		// (update-only) clean up the relation of the old value: remove the existing relations related to that attribute, we DO have a reference, the id
+		// ==> DELETE FROM correlations WHERE 1_attribute_id = $a_id OR attribute_id = $a_id; */
+		// first check if it's an update
+		if (isset($a['id'])) {
+			$this->Correlation = ClassRegistry::init('Correlation');
+			// FIXME : check that $a['id'] is checked correctly so that the user can't remove attributes he shouldn't
+			$dummy = $this->Correlation->deleteAll(array('OR' => array(
+					'Correlation.1_attribute_id' => $a['id'],
+					'Correlation.attribute_id' => $a['id']))
+			);
+		}
 	}
 
-	private function __beforeDeleteCorrelation($attribute) {
+	public function __afterSaveCorrelation($a) {
+		// Don't do any correlation if the type is vulnerability or comment
+		if ($a['type'] !== 'vulnerability' && $a['type'] !== 'comment') {
+			$this->Correlation = ClassRegistry::init('Correlation');
+			// When we add/update an attribute we need to
+			// - (beforeSave) (update-only) clean up the relation of the old value: remove the existing relations related to that attribute, we DO have a reference, the id
+
+			// - remove the existing relations for that value1 or value2, we do NOT have an id reference, but we have a value1/value2 field to search for
+			// ==> DELETE FROM correlations WHERE value = $value1 OR value = $value2 */
+			$dummy = $this->Correlation->deleteAll(array('Correlation.value' => array($a['value1'], $a['value2'])));
+
+			// now build a correlation array of things that will need to be added in the db
+			// we do this twice, once for value1 and once for value2
+			$correlations = array();   // init variable
+			$value_names = array ('value1', 'value2');
+			// do the correlation for value1 and value2, this needs to be done separately
+			foreach ($value_names as $value_name) {
+			    if (empty($a[$value_name])) continue;  // do not correlate if attribute is empty
+			    $params = array(
+			            'conditions' => array(
+			            	'OR' => array(
+			                    'Attribute.value1' => $a[$value_name],
+			                    'Attribute.value2' => $a[$value_name]
+			            	),
+			            	'AND' => array(
+			            		'Attribute.type !=' => 'vulnerability',
+			            		'Attribute.type !=' => 'comment',
+						)),
+			            'recursive' => 0,
+			            //'fields' => '', // we want to have the Attribute AND Event, so do not filter here
+			    );
+			    // search for the related attributes for that "value(1|2)"
+			    $attributes = $this->find('all', $params);
+			    // build the correlations, each attribute should have a relation in both directions
+			    // this is why we have a double loop.
+			    // The result is that for each Attribute pair we want: A1-A2, A2-A1 and so on,
+			    // In total that's N * (N-1) rows (minus the ones from the same event) (with N the number of related attributes)
+			    $attributes_right = $attributes;
+			    foreach ($attributes as $attribute) {
+			        foreach ($attributes_right as $attribute_right) {
+			            if ($attribute['Attribute']['event_id'] == $attribute_right['Attribute']['event_id']) {
+			                // do not build a relation between the same attributes
+			                // or attributes from the same event
+			                continue;
+			            }
+			            $is_private = ($attribute_right['Event']['distribution'] == 0) || ($attribute_right['Attribute']['distribution'] == 0);
+			            $correlations[] = array(
+			                    'value' => $a[$value_name],
+			                    '1_event_id' => $attribute['Attribute']['event_id'],
+			                    '1_attribute_id' => $attribute['Attribute']['id'],
+			                    'event_id' => $attribute_right['Attribute']['event_id'],
+			                    'attribute_id' => $attribute_right['Attribute']['id'],
+			                    'org' => $attribute_right['Event']['org'],
+			                    'private' => $is_private,
+			                    'date' => $attribute_right['Event']['date'],
+			            		'info' => $attribute_right['Event']['info'],
+			            );
+			        }
+			    }
+			}
+			// save the new correlations to the database in a single shot
+			$this->Correlation->saveMany($correlations);
+		}
+	}
+
+	private function __beforeDeleteCorrelation($attribute_id) {
 		$this->Correlation = ClassRegistry::init('Correlation');
+		// When we remove an attribute we need to
+		// - remove the existing relations related to that attribute, we DO have an id reference
+		// ==> DELETE FROM correlations WHERE 1_attribute_id = $a_id OR attribute_id = $a_id;
 		$dummy = $this->Correlation->deleteAll(array('OR' => array(
-						'Correlation.1_attribute_id' => $attribute,
-						'Correlation.attribute_id' => $attribute))
+						'Correlation.1_attribute_id' => $attribute_id,
+						'Correlation.attribute_id' => $attribute_id))
 		);
-	}
-
-/**
- * return an array containing 'double-values'
- *
- * @return array()
- */
-	public function doubleAttributes() {
-		$doubleAttributes = array();
-
-		$similarValue1 = $this->find('all',array('conditions' => array(),
-												'fields' => 'value1',
-												'recursive' => 0,
-												'group' => 'Attribute.value1 HAVING count(1)>1' ));
-		$similarValue2 = $this->find('all',array('conditions' => array(),
-												'fields' => 'value2',
-												'recursive' => 0,
-												'group' => 'Attribute.value2 HAVING count(1)>1' ));
-		$similarValues = $this->find('all', array('joins' => array(array(
-															'table' => 'attributes',
-															'alias' => 'att2',
-															'type' => 'INNER',
-															'conditions' => array('Attribute.value2 = att2.value1'))),
-															'fields' => array('att2.value1')));
-		$doubleAttributes = array_merge($similarValue1,$similarValue2);
-		$doubleAttributes = array_merge($doubleAttributes,$similarValues);
-
-		$double = array();
-		foreach ($doubleAttributes as $key => $doubleAttribute) {
-			$v = isset($doubleAttribute['Attribute']) ? $doubleAttribute['Attribute'] : $doubleAttribute['att2'];
-			$v = isset($v['value1']) ? $v['value1'] : $v['value2'];
-			if ($v != '') {
-				$double[] = $v;
-			}
-		}
-		return $double;
-	}
-
-	public function updateRelatedAttributes($attribute, $fields=array()) {
-		$this->Correlation = ClassRegistry::init('Correlation');
-		// update related
-		$attributes = $this->Correlation->find('all', array('recursive' => 0, 'conditions' => array('attribute_id' => $attribute['id'])));
-		foreach ($attributes as $attributeFound) {
-			$this->Correlation->read(null, $attributeFound['Correlation']['id']);
-			$this->Correlation->set(array(
-				'private' => isset($attribute['private']) ? $attribute['private'] : false,
-				'cluster' => isset($attribute['cluster']) ? $attribute['cluster'] : false,
-			));
-			$this->Correlation->save();
-		}
-		// update relating
-		$attributes = $this->Correlation->find('all', array('recursive' => 0, 'conditions' => array('1_attribute_id' => $attribute['id'])));
-		foreach ($attributes as $attributeFound) {
-			$this->Correlation->read(null, $attributeFound['Correlation']['id']);
-			$this->Correlation->set(array(
-				'1_private' => isset($attribute['private']) ? $attribute['private'] : false,
-			));
-			$this->Correlation->save();
-		}
-		// TODO what if value1/2 changes??
-	}
-
-	public function setInitialRelatedAttributes($attribute, $fields=array()) {
-		$this->Event = ClassRegistry::init('Event');
-		$relatedAttributes = $this->getRelatedAttributes($attribute, $fields);
-		if ($relatedAttributes) {
-			$this->Correlation = ClassRegistry::init('Correlation');
-			foreach ($relatedAttributes as $relatedAttribute) {
-
-				// and store into table
-				$params = array(
-					'conditions' => array('Event.id' => $relatedAttribute['Attribute']['event_id']),
-					'recursive' => 0,
-					'fields' => array('Event.date', 'Event.org', 'Event.private', 'Event.cluster')
-				);
-				$eventDate = $this->Event->find('first', $params);
-
-				// event preveal over atribute
-				$isPrivate = $eventDate['Event']['private'] ? $eventDate['Event']['private'] : $relatedAttribute['Attribute']['private'];
-				$isCluster = $eventDate['Event']['cluster'] ? $eventDate['Event']['cluster'] : $relatedAttribute['Attribute']['cluster'];
-
-				// needed seek original Org
-				$params = array(
-					'conditions' => array('Event.id' => $attribute['event_id']),
-					'recursive' => 0,
-					'fields' => array('Event.org', 'Event.private', 'Event.cluster')
-				);
-				$eventOrg = $this->Event->find('first', $params);
-				$origPrivate = isset($attribute['private']) ? $attribute['private'] : false;
-				$origPrivate = $eventOrg['Event']['private'] ? $eventOrg['Event']['private'] : $origPrivate;
-
-				$this->Correlation->create();
-				$this->Correlation->save(array(
-					'Correlation' => array(
-						'1_event_id' => $attribute['event_id'], '1_attribute_id' => $attribute['id'], '1_private' => $origPrivate,
-						//'1_org' => $eventOrg['Event']['org'], // TODO newest
-						'event_id' => $relatedAttribute['Attribute']['event_id'], 'attribute_id' => $relatedAttribute['Attribute']['id'],
-						'org' => $eventDate['Event']['org'],
-						'private' => $isPrivate,
-						'cluster' => $isCluster,
-						'date' => $eventDate['Event']['date']))
-				);
-			}
-		}
-	}
-
-	public function setRelatedAttributes($attribute, $fields=array()) {
-		$this->setInitialRelatedAttributes($attribute, $fields);
-		$this->Event = ClassRegistry::init('Event');
-		$relatedAttributes = $this->getRelatedAttributes($attribute, $fields);
-		if ($relatedAttributes) {
-			$this->Correlation = ClassRegistry::init('Correlation');
-			foreach ($relatedAttributes as $relatedAttribute) {
-
-				// and vise versa
-				$params = array(
-					'conditions' => array('Event.id' => $attribute['event_id']),
-					'recursive' => 0,
-					'fields' => array('Event.date', 'Event.org', 'Event.private', 'Event.cluster')
-				);
-				$eventDate = $this->Event->find('first', $params);
-				// event preveal over atribute
-				$origPrivate = isset($attribute['private']) ? $attribute['private'] : false;
-				$origPrivate = $eventDate['Event']['private'] ? $eventDate['Event']['private'] : $origPrivate;
-				$origCluster = isset($attribute['cluster']) ? $attribute['cluster'] : false;
-				$origCluster = $eventDate['Event']['cluster'] ? $eventDate['Event']['cluster'] : $origCluster;
-
-				// event preveal over atribute
-				$params = array(
-					'conditions' => array('Event.id' => $relatedAttribute['Attribute']['event_id']),
-					'recursive' => 0,
-					'fields' => array('Event.date', 'Event.org', 'Event.private', 'Event.cluster')
-				);
-				$isEvent = $this->Event->find('first', $params);
-				$isPrivate = $isEvent['Event']['private'] ? $isEvent['Event']['private'] : $relatedAttribute['Attribute']['private'];
-				$isCluster = $isEvent['Event']['cluster'] ? $isEvent['Event']['cluster'] : $relatedAttribute['Attribute']['cluster'];
-
-				$this->Correlation->create();
-				$this->Correlation->save(array(
-					'Correlation' => array(
-						'1_event_id' => $relatedAttribute['Attribute']['event_id'], '1_attribute_id' => $relatedAttribute['Attribute']['id'], '1_private' => $isPrivate,
-						//'1_org' => $relatedAttribute['Event']['org'], // TODO newest
-						'event_id' => $attribute['event_id'], 'attribute_id' => $attribute['id'],
-						'org' => $eventDate['Event']['org'],
-						'private' => $origPrivate,
-						'cluster' => $origCluster,
-						'date' => $eventDate['Event']['date']))
-				);
-			}
-		}
 	}
 
 	public function uploadAttributeToServer($attribute, $server, $HttpSocket=null) {
@@ -1074,15 +1013,16 @@ class Attribute extends AppModel {
  */
 	public function restfullAttributeToServer($attribute, $server, $urlPath, $HttpSocket=null) {
 		// do not keep attributes that are private
-		if (true == $attribute['private']) { // never upload private events
+		if (0 == $attribute['distribution']) { // never upload private events
 			return "Attribute is private and non exportable";
 		}
 
 		$url = $server['Server']['url'];
 		$authkey = $server['Server']['authkey'];
 		if (null == $HttpSocket) {
-			App::uses('HttpSocket', 'Network/Http');
-			$HttpSocket = new HttpSocket();
+			App::uses('SyncTool', 'Tools');
+			$syncTool = new SyncTool();
+			$HttpSocket = $syncTool->setupHttpSocket($server);
 		}
 		$request = array(
 				'header' => array(
@@ -1156,8 +1096,9 @@ class Attribute extends AppModel {
 		$url = $server['Server']['url'];
 		$authkey = $server['Server']['authkey'];
 		if (null == $HttpSocket) {
-			App::uses('HttpSocket', 'Network/Http');
-			$HttpSocket = new HttpSocket();
+			App::uses('SyncTool', 'Tools');
+			$syncTool = new SyncTool();
+			$HttpSocket = $syncTool->setupHttpSocket($server);
 		}
 		$request = array(
 				'header' => array(
@@ -1191,4 +1132,202 @@ class Attribute extends AppModel {
 		}
 		return $fails;
 	}
+	
+	public function hids($isSiteAdmin, $org ,$type, $tags = '') {
+		// check if it's a valid type
+		if ($type != 'md5' && $type != 'sha1') {
+			throw new UnauthorizedException('Invalid hash type.');
+		}
+		
+		//restricting to non-private or same org if the user is not a site-admin.
+		$conditions['AND'] = array('Attribute.to_ids' => 1, 'Event.published' => 1);
+		if (!$isSiteAdmin) {
+			$temp = array();
+			$distribution = array();
+			array_push($temp, array('Attribute.distribution >' => 0));
+			array_push($temp, array('(SELECT events.org FROM events WHERE events.id = Attribute.event_id) LIKE' => $org));
+			$conditions['OR'] = $temp;
+		}
+		
+		// If we sent any tags along, load the associated tag names for each attribute
+		if ($tags !== '') {
+			$tag = ClassRegistry::init('Tag');
+			$args = $this->dissectArgs($tags);
+			$tagArray = $tag->fetchEventTagIds($args[0], $args[1]);
+			$temp = array();
+			foreach ($tagArray[0] as $accepted) {
+				$temp['OR'][] = array('Event.id' => $accepted);
+			}
+			$conditions['AND'][] = $temp;
+			$temp = array();
+			foreach ($tagArray[1] as $rejected) {
+				$temp['AND'][] = array('Event.id !=' => $rejected);
+			}
+			$conditions['AND'][] = $temp;
+		}
+		
+		$params = array(
+				'conditions' => $conditions, //array of conditions
+				'recursive' => 0, //int
+				'group' => array('Attribute.type', 'Attribute.value1'), //fields to GROUP BY
+		);
+		$items = $this->find('all', $params);
+		App::uses('HidsExport', 'Export');
+		$export = new HidsExport();
+		$rules = $export->export($items, strtoupper($type));
+		return $rules;
+	}
+	
+	public function nids($isSiteAdmin, $org, $format, $sid, $id = null, $continue = false, $tags = '') {
+		//restricting to non-private or same org if the user is not a site-admin.
+		$conditions['AND'] = array('Attribute.to_ids' => 1, "Event.published" => 1);
+		if (!$isSiteAdmin) {
+			$temp = array();
+			$distribution = array();
+			array_push($temp, array('Attribute.distribution >' => 0));
+			array_push($temp, array('(SELECT events.org FROM events WHERE events.id = Attribute.event_id) LIKE' => $org));
+			$conditions['OR'] = $temp;
+		}
+		
+		if ($id) {
+			array_push($conditions['AND'], array('Event.id' => $id));
+		}
+		// If we sent any tags along, load the associated tag names for each attribute
+		if ($tags !== '') {
+			$tag = ClassRegistry::init('Tag');
+			$args = $this->dissectArgs($tags);
+			$tagArray = $tag->fetchEventTagIds($args[0], $args[1]);
+			$temp = array();
+			foreach ($tagArray[0] as $accepted) {
+				$temp['OR'][] = array('Event.id' => $accepted);
+			}
+			$conditions['AND'][] = $temp;
+			$temp = array();
+			foreach ($tagArray[1] as $rejected) {
+				$temp['AND'][] = array('Event.id !=' => $rejected);
+			}
+			$conditions['AND'][] = $temp;
+		}
+		
+		$params = array(
+				'conditions' => $conditions, //array of conditions
+				'recursive' => 0, //int
+				'group' => array('Attribute.type', 'Attribute.value1'), //fields to GROUP BY
+		);
+		unset($this->virtualFields['category_order']);  // not needed for IDS export and speeds things up
+		$items = $this->find('all', $params);
+		
+		// export depending of the requested type
+		switch ($format) {
+			case 'suricata':
+-				App::uses('NidsSuricataExport', 'Export');
+				$export = new NidsSuricataExport();
+				break;
+			case 'snort':
+				App::uses('NidsSnortExport', 'Export');
+				$export = new NidsSnortExport();
+				break;
+		}
+		$rules = $export->export($items, $sid, $format, $continue);
+		return $rules;
+	}
+
+	 public function text($org, $isSiteAdmin, $type, $tags = '') {
+	 	//restricting to non-private or same org if the user is not a site-admin.
+	 	$conditions['AND'] = array('Attribute.type' => $type, 'Attribute.to_ids =' => 1, 'Event.published =' => 1);
+	 	if (!$isSiteAdmin) {
+	 		$temp = array();
+	 		$distribution = array();
+	 		array_push($temp, array('Attribute.distribution >' => 0));
+	 		array_push($temp, array('(SELECT events.org FROM events WHERE events.id = Attribute.event_id) LIKE' => $org));
+	 		$conditions['OR'] = $temp;
+	 	}
+	 	
+	 	// If we sent any tags along, load the associated tag names for each attribute
+	 	if ($tags !== '') {
+	 		$tag = ClassRegistry::init('Tag');
+	 		$args = $this->dissectArgs($tags);
+	 		$tagArray = $tag->fetchEventTagIds($args[0], $args[1]);
+	 		$temp = array();
+	 		foreach ($tagArray[0] as $accepted) {
+	 			$temp['OR'][] = array('Event.id' => $accepted);
+	 		}
+	 		$conditions['AND'][] = $temp;
+	 		$temp = array();
+	 		foreach ($tagArray[1] as $rejected) {
+	 			$temp['AND'][] = array('Event.id !=' => $rejected);
+	 		}
+	 		$conditions['AND'][] = $temp;
+	 	}
+	 	
+	 	$params = array(
+	 			'conditions' => $conditions, //array of conditions
+	 			//'recursive' => 2, //int
+	 			//'fields' => array('Attribute.value'), //array of field names
+	 			'order' => array('Attribute.value'), //string or array defining order
+	 			'group' => array('Attribute.value'), //fields to GROUP BY
+	 			'contain' => array('Event' => array(
+	 					'fields' => array('Event.id', 'Event.published'),
+	 	
+	 			)));
+	 	
+	 	$attributes = $this->find('all', $params);
+	 	return $attributes;
+	 }
+	 
+	 public function generateCorrelation() {
+	 	$this->Correlation = ClassRegistry::init('Correlation');
+	 	$this->Correlation->deleteAll(array('id !=' => ''), false);
+	 	$fields = array('Attribute.id', 'Attribute.event_id', 'Attribute.distribution', 'Attribute.type', 'Attribute.category', 'Attribute.value1', 'Attribute.value2');
+	 	// get all attributes..
+	 	$attributes = $this->find('all', array('recursive' => -1, 'fields' => $fields));
+	 	// for all attributes..
+	 	foreach ($attributes as $k => $attribute) {
+	 		$this->__afterSaveCorrelation($attribute['Attribute']);
+	 	}
+	 	return $k;
+	 }
+	 
+	 public function reportValidationIssuesAttributes() {
+	 	// for efficiency reasons remove the unique requirement
+	 	$this->validator()->remove('value', 'unique');
+	 
+	 	// get all attributes..
+	 	$attributes = $this->find('all', array('recursive' => -1));
+	 	// for all attributes..
+	 	$result = array();
+	 	$i = 0;
+	 	foreach ($attributes as $attribute) {
+	 		$this->set($attribute);
+	 		if ($this->validates()) {
+	 			// validates
+	 		} else {
+	 			$errors = $this->validationErrors;
+	 			$result[$i]['id'] = $attribute['Attribute']['id'];
+	 			// print_r
+	 			$result[$i]['error'] = $errors['value'][0];
+	 			$result[$i]['details'] = 'Event ID: [' . $attribute['Attribute']['event_id'] . "] - Category: [" . $attribute['Attribute']['category'] . "] - Type: [" . $attribute['Attribute']['type'] . "] - Value: [" . $attribute['Attribute']['value'] . ']';
+	 			$i++;
+	 		}
+	 	}
+	 	return $result;
+	 }
+	 
+	 // This method takes a string from an argument with several elements (separated by '&&' and negated by '!') and returns 2 arrays
+	 // array 1 will have all of the non negated terms and array 2 all the negated terms
+	 public function dissectArgs($args) {
+	 	$argArray = explode('&&', $args);
+	 	$accept = $reject = $result = array();
+	 	$reject = array();
+	 	foreach ($argArray as $arg) {
+	 		if (substr($arg, 0, 1) == '!') {
+	 			$reject[] = substr($arg, 1);
+	 		} else {
+	 			$accept[] = $arg;
+	 		}
+	 	}
+	 	$result[0] = $accept;
+	 	$result[1] = $reject;
+	 	return $result;
+	 }
 }

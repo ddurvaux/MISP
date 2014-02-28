@@ -1,43 +1,68 @@
 <div class="roles form">
 <?php echo $this->Form->create('Role');?>
 	<fieldset>
-		<legend><?php echo __('Add Role'); ?></legend>
+		<legend>Add Role</legend>
 	<?php
 		echo $this->Form->input('name');?>
-		<?php echo $this->Form->radio('permission', $options, array('value' => '3'));?>
+		<?php echo $this->Form->input('permission', array('type' => 'select', 'options' => $options), array('value' => '3'));?>
+		<div class = 'input clear'></div>
 		<?php echo $this->Form->input('perm_sync', array('type' => 'checkbox', 'checked' => false));?>
 		<?php echo $this->Form->input('perm_admin', array('type' => 'checkbox', 'checked' => false));?>
 		<?php echo $this->Form->input('perm_audit', array('type' => 'checkbox', 'checked' => false));?>
+		<div class = 'input clear'></div>
 		<?php echo $this->Form->input('perm_auth', array('type' => 'checkbox', 'checked' => false));?>
+		<?php echo $this->Form->input('perm_site_admin', array('type' => 'checkbox', 'checked' => false));?>
+		<?php echo $this->Form->input('perm_regexp_access', array('type' => 'checkbox', 'checked' => false));?>
+		<?php echo $this->Form->input('perm_tagger', array('type' => 'checkbox', 'checked' => false));?>
 	</fieldset>
-<?php echo $this->Form->end(__('Submit'));?>
-</div>
-<div class="actions">
-	<ul>
-		<?php echo $this->element('actions_menu'); ?>
-	</ul>
-</div>
-
 <?php
-$this->Js->get('#RolePermission0')->event('change', 'deactivateActions()');
-$this->Js->get('#RolePermission1')->event('change', 'deactivateActions()');
+echo $this->Form->button('Add', array('class' => 'btn btn-primary'));
+echo $this->Form->end();
+?>
+</div>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'admin', 'menuItem' => 'addRole'));
+
+
+	$this->Js->get('#RolePermission')->event('change', 'deactivateActions()');
 
 $this->Js->get('#RolePermSync')->event('change', 'checkPerms("RolePermSync")');
 $this->Js->get('#RolePermAdmin')->event('change', 'checkPerms("RolePermAdmin")');
 $this->Js->get('#RolePermAudit')->event('change', 'checkPerms("RolePermAudit")');
+$this->Js->get('#RolePermSiteAdmin')->event('change', 'checkPerms("RolePermSiteAdmin");activateAll();');
+$this->Js->get('#RolePermRegexpAccess')->event('change', 'checkPerms("RolePermRegexpAccess")');
+$this->Js->get('#RolePermTagger')->event('change', 'checkPerms("RolePermTagger")');
 ?>
 
 <script type="text/javascript">
 // only be able to tick perm_sync if manage org events and above.
 
 function deactivateActions() {
-	document.getElementById("RolePermSync").checked = false;
-	document.getElementById("RolePermAdmin").checked = false;
-	document.getElementById("RolePermAudit").checked = false;
+	var e = document.getElementById("RolePermission");
+	if (e.options[e.selectedIndex].value == '0' || e.options[e.selectedIndex].value == '1') {
+		document.getElementById("RolePermSync").checked = false;
+		document.getElementById("RolePermAdmin").checked = false;
+		document.getElementById("RolePermAudit").checked = false;
+		document.getElementById("RolePermSiteAdmin").checked = false;
+		document.getElementById("RolePermRegexpAccess").checked = false;
+		document.getElementById("RolePermRegexpTagger").checked = false;
+	}
+}
+
+function activateAll() {
+	if (document.getElementById("RolePermSiteAdmin").checked) {
+		document.getElementById("RolePermSync").checked = true;
+		document.getElementById("RolePermAdmin").checked = true;
+		document.getElementById("RolePermAudit").checked = true;
+		document.getElementById("RolePermAuth").checked = true;
+		document.getElementById("RolePermRegexpAccess").checked = true;
+		document.getElementById("RolePermTagger").checked = true;
+	}
 }
 
 function checkPerms(id) {
-	if ((document.getElementById("RolePermission0").checked) || (document.getElementById("RolePermission1").checked)) {
+	var e = document.getElementById("RolePermission");
+	if (e.options[e.selectedIndex].value == '0' || e.options[e.selectedIndex].value == '1') {
 		document.getElementById(id).checked = false;
 	}
 }

@@ -9,15 +9,9 @@ App::uses('AppController', 'Controller');
  */
 class RolesController extends AppController {
 
-	public $options = array('0' => 'Read Only', '1' => 'Manage My Own Events', '2' => 'Manage Organization Events', '3' => 'Manage &amp; Publish Organization Events');
+	public $options = array('0' => 'Read Only', '1' => 'Manage My Own Events', '2' => 'Manage Organization Events', '3' => 'Manage & Publish Organization Events'); // FIXME move this to Role Model
 
 	public $components = array(
-		'Acl',
-		'Auth' => array(
-			'authorize' => array(
-				'Actions' => array('actionPath' => 'controllers')
-			)
-		),
 		'Security',
 		'Session', 'AdminCrud' // => array('fields' => array('name'))
 	);
@@ -50,6 +44,7 @@ class RolesController extends AppController {
 			throw new NotFoundException(__('Invalid role'));
 		}
 		$this->set('role', $this->Role->read(null, $id));
+		$this->set('id', $id);
 	}
 
 /**
@@ -58,14 +53,13 @@ class RolesController extends AppController {
  * @return void
  */
 	public function admin_add() {
-		if($this->Auth->User('org') != 'ADMIN') $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
+		if(!$this->_isSiteAdmin()) $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
 		if ($this->request->is('post')) {
 			$this->Role->create();
 			if ($this->Role->save($this->request->data)) {
 				$this->Session->setFlash(__(sprintf('The Role has been saved.')));
 				$this->set('options', $this->options);
 				$passAlong = $this->Role->read(null, $this->Role->getInsertID());
-				$this->generateACL($passAlong);
 				$this->redirect(array('action' => 'index'));
 			} else {
 				if (!($this->Session->check('Message.flash'))) {
@@ -83,7 +77,7 @@ class RolesController extends AppController {
  * @return void
  */
 	public function admin_index() {
-		if($this->Auth->User('org') != 'ADMIN') $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
+		if(!$this->_isSiteAdmin()) $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
 		$this->AdminCrud->adminIndex();
 		$this->set('options', $this->options);
 	}
@@ -96,11 +90,11 @@ class RolesController extends AppController {
  * @throws NotFoundException
  */
 	public function admin_edit($id = null) {
-		if($this->Auth->User('org') != 'ADMIN') $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
+		if(!$this->_isSiteAdmin()) $this->redirect(array('controller' => 'roles', 'action' => 'index', 'admin' => false));
 		$this->AdminCrud->adminEdit($id);
 		$passAlong = $this->Role->read(null, $id);
-		$this->generateACL($passAlong);
 		$this->set('options', $this->options);
+		$this->set('id', $id);
 	}
 
 /**
@@ -124,7 +118,7 @@ class RolesController extends AppController {
  */
 	public function index() {
 		$this->recursive = 0;
-		$this->set('list', Sanitize::clean($this->paginate()));
+		$this->set('list', $this->paginate());
 		$this->set('options', $this->options);
 	}
 }

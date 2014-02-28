@@ -21,12 +21,19 @@ else:?>
 	</ul>
 	<?php
 endif;?>
-</div>
-<div class="actions">
+	<h2>Proposals pulled</h2>
+	<?php
+if (0 == count($pulledProposals)):?>
+	<p>No proposals pulled</p>
+	<?php
+else:?>
 	<ul>
-		<li><?php echo $this->Html->link(__('New Server'), array('controller' => 'servers', 'action' => 'add')); ?></li>
-		<li><?php echo $this->Html->link(__('List Servers'), array('controller' => 'servers', 'action' => 'index'));?></li>
-		<li>&nbsp;</li>
-		<?php echo $this->element('actions_menu'); ?>
+	<?php foreach ($pulledProposals as $e => $p) echo '<li>Event ' . $e . ' : ' . $p . ' proposal(s).</li>'; ?>
 	</ul>
+	<?php
+endif;?>
+
 </div>
+<?php 
+	echo $this->element('side_menu', array('menuList' => 'sync', 'menuItem' => 'pull'));
+?>
