@@ -35,7 +35,9 @@
 					<li><?php echo $this->Form->postLink('Publish Event', array('action' => 'alert', $event['Event']['id']), null, 'Are you sure this event is complete and everyone should be informed?'); ?></li>
 					<li><?php echo $this->Form->postLink('Publish (no email)', array('action' => 'publish', $event['Event']['id']), null, 'Publish but do NOT send alert email? Only for minor changes!'); ?></li>
 					<?php endif; ?>
-					<li <?php if ($menuItem === 'contact') echo 'class="active"';?>><a href="/events/contact/<?php echo $event['Event']['id'];?>">Contact Reporter</a></li>
+					<?php if(!$isPublic) { ?>
+						<li <?php if ($menuItem === 'contact')  echo 'class="active"';?>><a href="/events/contact/<?php echo $event['Event']['id'];?>">Contact Reporter</a></li>
+					<?php } ?>
 					<li><a href="/events/xml/download/<?php echo $event['Event']['id'];?>">Download as XML</a></li>
 					<?php if (isset($event['Event']['published']) && $event['Event']['published']): ?>
 					<li><a href="/events/downloadOpenIOCEvent/<?php echo $event['Event']['id'];?>">Download as IOC</a></li>
